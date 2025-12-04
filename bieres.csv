@@ -1,0 +1,46 @@
+Nom;Type;Degre;Description;Aromes;Lien_Achat
+La Chouffe;Blonde;8.0;La célèbre bière du lutin. Ronde, forte et épicée.;Coriandre, Épices, Fruité, Agrumes;https://amzn.to/EXEMPLE
+Duvel;Blonde;8.5;Sèche, forte et très effervescente. Une référence belge.;Houblon, Poire, Pomme, Levure;https://amzn.to/EXEMPLE
+Tripel Karmeliet;Blonde;8.4;Brassée avec trois céréales. Complexe et gourmande.;Vanille, Citron, Biscuit, Banane;
+Westmalle Tripel;Blonde;9.5;La mère de toutes les triples. Complexe et fruitée.;Banane, Épices, Levure, Alcool;
+Cuvée des Trolls;Blonde;7.0;Une bière brumeuse aux arômes de fruits jaunes.;Orange, Miel, Fruits jaunes, Fleurs;
+Delirium Tremens;Blonde;8.5;Bière forte aux trois levures. L'éléphant rose.;Poivre, Pomme, Alcool, Épices;
+Leffe Blonde;Blonde;6.6;Une bière d'abbaye de tradition.;Clou de girofle, Vanille, Banane, Malt;
+Paix Dieu;Blonde;10.0;Brassée uniquement les soirs de pleine lune. Onctueuse.;Levure, Fruit, Malt, Biscuit;
+Brewdog Punk IPA;IPA;5.6;L'IPA qui a lancé la révolution craft en Europe.;Pamplemousse, Tropical, Ananas, Pin;https://amzn.to/EXEMPLE
+Lagunitas IPA;IPA;6.2;Une IPA ronde, caramélisée et résineuse. Style West Coast.;Caramel, Tropical, Agrumes, Pin;
+Stone IPA;IPA;6.9;L'IPA californienne classique. Très amère et résineuse.;Pin, Résine, Agrumes, Pamplemousse;
+Goose Island IPA;IPA;5.9;Une IPA anglaise classique revisitée aux USA.;Floral, Terreux, Orange, Houblon;
+Hazy Jane;IPA;5.0;Une New England IPA (NEIPA). Trouble et très juteuse.;Tropical, Mangue, Ananas, Avoine;
+Elvis Juice;IPA;6.5;Une IPA infusée au pamplemousse. Très fruitée.;Pamplemousse, Agrumes, Orange, Caramel;
+Guinness Draught;Stout;4.2;La bière noire irlandaise iconique. Crémeuse et torréfiée.;Café, Chocolat, Rôti, Caramel;
+Founders Breakfast Stout;Stout;8.3;Un stout impérial au café et au chocolat. Intense.;Café, Chocolat, Avoine, Vanille;
+O'Hara's Irish Stout;Stout;4.3;Un stout irlandais traditionnel, plus sec que la Guinness.;Café, Rôti, Sec, Herbacé;
+Left Hand Milk Stout;Stout;6.0;Stout doux contenant du lactose. Très onctueux.;Chocolat, Lait, Sucre, Café;
+Kwak;Ambrée;8.4;Bière douce avec des notes de caramel et d'épices.;Caramel, Réglisse, Biscuit, Malt grillé;
+Kilkenny;Ambrée;4.3;Ale rousse irlandaise crémeuse (azote).;Caramel, Noisette, Crème, Doux;
+Amber shock;Ambrée;7.0;Une ambrée italienne forte et maltée.;Caramel, Fruits secs, Toffee, Alcool;
+Aecht Schlenkerla Rauchbier;Ambrée;5.1;La bière fumée de Bamberg. Le goût du feu de bois.;Fumé, Bacon, Bois, Malt;
+Chimay Bleue;Ambrée;9.0;Une authentique trappiste brune (Dark Strong Ale).;Caramel, Fruits secs, Épices, Prune;
+Rochefort 10;Ambrée;11.3;Une des bières les plus complexes au monde. Trappiste.;Prune, Cacao, Figues, Malt;
+Hoegaarden Blanche;Blanche;4.9;La blanche originale belge.;Écorce d'orange, Coriandre, Blé, Citron;
+Weihenstephaner Hefeweissbier;Blanche;5.4;La référence allemande des bières de blé.;Banane, Clou de girofle, Blé, Pain;
+Blue Moon;Blanche;5.4;Witbier américaine servie avec une tranche d'orange.;Orange, Avoine, Coriandre, Doux;
+Blanche de Namur;Blanche;4.5;Une blanche belge très fine et florale.;Floral, Citron, Blé, Levure;
+Schneider Weisse Tap 7;Blanche;5.4;Une Weizen ambrée allemande. Plus de corps.;Banane, Muscade, Pain, Caramel;
+Saison Dupont;Saison;6.5;La référence absolue des bières de ferme. Sèche et houblonnée.;Foin, Poivre, Floral, Terreux;
+Tank 7 Farmhouse Ale;Saison;8.5;Une saison américaine forte et très aromatique.;Pamplemousse, Poivre, Épices, Paille;
+Orval;Saison;6.2;Trappiste unique, sèche et un peu sauvage (brettanomyces).;Cuir, Épices, Terreux, Orange;
+Rodenbach Grand Cru;Sour;6.0;Bière rouge des Flandres, vieillie en foudre. Aigre-douce.;Vinaigre, Cerise, Bois, Acide;
+Lindemans Kriek;Sour;3.5;Lambic sucré aux cerises.;Cerise, Sucre, Fruit, Bonbon;
+Cantillon Gueuze;Sour;5.0;Le vrai Lambic bruxellois. Acide, sec et complexe.;Citron, Acide, Cuir, Pomme verte;
+Petrus Aged Pale;Sour;7.3;Bière blonde acide vieillie en foudre de chêne.;Acide, Citron, Bois, Vinaigre;
+Duchesse de Bourgogne;Sour;6.2;Rouge des Flandres très balsamique.;Vinaigre balsamique, Prune, Chocolat, Acide;
+Pilsner Urquell;Lager;4.4;La première pils du monde. Tchèque et herbacée.;Herbacé, Miel, Pain, Beurre;
+Brooklyn Lager;Lager;5.2;Lager ambrée américaine avec houblonnage à cru.;Caramel, Floral, Herbacé, Pain grillé;
+Corona Extra;Lager;4.5;La lager mexicaine légère.;Maïs, Citron, Malt, Céréales;
+Budweiser Budvar;Lager;5.0;Lager tchèque ronde et maltée.;Pain, Herbacé, Malt, Doux;
+Samuel Adams Boston Lager;Lager;5.0;Lager américaine classique, assez maltée.;Caramel, Pin, Terreux, Pain;
+La Trappe Quadrupel;Ambrée;10.0;Trappiste hollandaise très forte et liquoreuse.;Datte, Caramel, Vanille, Alcool;
+Gulden Draak;Ambrée;10.5;Bière brune forte, bouteille blanche.;Caramel, Chocolat, Café, Alcool;
+St. Bernardus Abt 12;Ambrée;10.0;Souvent comparée à la Westvleteren 12.;Raisin, Caramel, Prune, Chocolat
