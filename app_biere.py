@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from fpdf import FPDF
-import base64
+import os
 
 # --- CONFIGURATION INITIALE ---
 st.set_page_config(page_title="Beer Master", page_icon="🍺", layout="wide")
@@ -11,7 +11,6 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Rye&family=Poppins:wght@300;600&display=swap');
     
-    /* TITRE PRINCIPAL (Sans Emoji) */
     .main-title {
         font-family: 'Rye', serif;
         font-size: 4em;
@@ -21,10 +20,9 @@ st.markdown("""
         text-shadow: 2px 2px 0px #000;
     }
     
-    /* SOUS-TITRE AGRANDI (2.5em) */
     .sub-title {
         font-family: 'Poppins', sans-serif;
-        font-size: 2.5em; /* Agrandissement demandé */
+        font-size: 2.5em;
         text-align: center;
         color: #555;
         font-weight: bold;
@@ -60,7 +58,6 @@ st.markdown("""
         color: #444;
     }
     
-    /* Masquer menu Streamlit */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -70,6 +67,11 @@ st.markdown("""
 # --- GESTION DE L'ÉTAT ---
 if 'recette_generee' not in st.session_state:
     st.session_state.recette_generee = False
+
+# --- FONCTION D'ARRONDI (Spécial 0.05kg) ---
+def round_grain(poids):
+    # On multiplie par 20, on arrondit à l'entier, on divise par 20
+    return round(poids * 20) / 20
 
 # --- CHARGEMENT DATA ---
 @st.cache_data
@@ -85,47 +87,99 @@ def load_data():
 
 df = load_data()
 
-# --- FONCTION GÉNÉRATION PDF ---
-def create_pdf(style, aromes, total_malt, malt_base, malt_spe, levure, amer, arome, dryhop, eau_emp, eau_rinc):
+# --- FONCTION GÉNÉRATION PDF DÉTAILLÉ ---
+def create_pdf(style, aromes, volume, degre, 
+               malt_list, # Liste de tuples (poids, nom)
+               levure_info, # Tuple (poids, nom)
+               houblons, # Liste de tuples (poids, nom, temps, usage)
+               process_info): # Dictionnaire avec les temps et températures
+    
     pdf = FPDF()
     pdf.add_page()
-    pdf.set_font("Arial", size=12)
     
-    # Titre
+    # LOGO (Si présent)
+    if os.path.exists("logo.png"):
+        try:
+            pdf.image("logo.png", x=10, y=8, w=30)
+        except:
+            pass
+
+    # TITRE
     pdf.set_font("Arial", 'B', 24)
-    pdf.cell(200, 20, txt=f"Recette : {style}", ln=1, align='C')
-    pdf.set_font("Arial", 'I', 14)
-    pdf.cell(200, 10, txt=f"Profil : {', '.join(aromes)}", ln=1, align='C')
-    pdf.ln(10)
+    pdf.cell(0, 20, txt="Beer Master", ln=1, align='C')
     
-    # Ingrédients
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(200, 10, txt="Ingrédients", ln=1, align='L')
-    pdf.set_font("Arial", size=12)
-    
-    pdf.cell(200, 10, txt=f"- Total Grains : {total_malt} kg", ln=1)
-    pdf.cell(200, 10, txt=f"  > {malt_base}", ln=1)
-    pdf.cell(200, 10, txt=f"  > {malt_spe}", ln=1)
-    pdf.cell(200, 10, txt=f"- Levure : {levure}", ln=1)
-    pdf.ln(5)
-    
-    pdf.cell(200, 10, txt=f"- Houblon Amérisant (60min) : {amer}", ln=1)
-    pdf.cell(200, 10, txt=f"- Houblon Aromatique (5min) : {arome}", ln=1)
-    if dryhop:
-        pdf.cell(200, 10, txt=f"- Dry Hop (J+4) : {dryhop}", ln=1)
+    pdf.set_font("Arial", 'I', 16)
+    pdf.cell(0, 10, txt=f"Fiche de Brassage : {style}", ln=1, align='C')
     pdf.ln(10)
 
-    # Volumes d'eau
-    pdf.set_font("Arial", 'B', 16)
-    pdf.cell(200, 10, txt="Volumes d'Eau", ln=1, align='L')
-    pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt=f"- Eau d'empâtage : {eau_emp} L", ln=1)
-    pdf.cell(200, 10, txt=f"- Eau de rinçage : {eau_rinc} L", ln=1)
+    # INFOS GÉNÉRALES
+    pdf.set_font("Arial", 'B', 12)
+    pdf.set_fill_color(230, 230, 230)
+    pdf.cell(0, 10, txt=f"Objectif : {volume} Litres  |  Alcool : {degre}%  |  Profil : {', '.join(aromes)}", ln=1, align='C', fill=True)
+    pdf.ln(10)
+    
+    # --- 1. BILL OF MATERIALS (GRAINS) ---
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, txt="1. Grains & Fermentescibles", ln=1)
+    pdf.set_font("Arial", size=11)
+    
+    total_grain = 0
+    for poids, nom in malt_list:
+        pdf.cell(30, 8, txt=f"{poids:.2f} kg", border=1, align='R')
+        pdf.cell(0, 8, txt=f" {nom}", border=1, ln=1)
+        total_grain += poids
+    
+    pdf.set_font("Arial", 'B', 11)
+    pdf.cell(30, 8, txt=f"Total : {total_grain:.2f} kg", border=0, align='R')
+    pdf.ln(10)
+
+    # --- 2. HOUBLONS ---
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, txt="2. Houblonnage", ln=1)
+    pdf.set_font("Arial", size=11)
+    
+    # En-tête tableau houblon
+    pdf.set_fill_color(240, 240, 240)
+    pdf.cell(30, 8, "Poids", 1, 0, 'C', True)
+    pdf.cell(80, 8, "Variété", 1, 0, 'L', True)
+    pdf.cell(40, 8, "Utilisation", 1, 0, 'L', True)
+    pdf.cell(40, 8, "Durée", 1, 1, 'C', True)
+    
+    for poids, nom, temps, usage in houblons:
+        pdf.cell(30, 8, f"{poids} g", 1, 0, 'C')
+        pdf.cell(80, 8, f" {nom}", 1, 0, 'L')
+        pdf.cell(40, 8, f" {usage}", 1, 0, 'L')
+        pdf.cell(40, 8, f" {temps}", 1, 1, 'C')
+    pdf.ln(10)
+
+    # --- 3. LEVURE ---
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, txt="3. Levure", ln=1)
+    pdf.set_font("Arial", size=11)
+    pdf.cell(0, 8, txt=f"Souche : {levure_info[1]}", ln=1)
+    pdf.cell(0, 8, txt=f"Quantité : {levure_info[0]}g", ln=1)
+    pdf.ln(10)
+
+    # --- 4. EAU & PROCESS ---
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 10, txt="4. Processus & Volumes d'Eau", ln=1)
+    pdf.set_font("Arial", size=11)
+    
+    # Empâtage
+    pdf.cell(95, 10, txt=f"Eau d'Empâtage : {process_info['eau_emp']} L", border=1)
+    pdf.cell(95, 10, txt=f"Palier : {process_info['temp_emp']}°C pendant 60 min", border=1, ln=1)
+    
+    # Rinçage / Ebu
+    pdf.cell(95, 10, txt=f"Eau de Rinçage : {process_info['eau_rinc']} L (75°C)", border=1)
+    pdf.cell(95, 10, txt=f"Ébullition : {process_info['temps_ebu']} min (100°C)", border=1, ln=1)
+    
+    # Fermentation
+    pdf.cell(190, 10, txt=f"Fermentation Primaire : ~15 jours à {process_info['temp_ferm']}°C", border=1, ln=1)
     
     # Pied de page
-    pdf.set_y(-30)
+    pdf.set_y(-20)
     pdf.set_font("Arial", 'I', 8)
-    pdf.cell(0, 10, "Généré par Beer Master - L'Atelier de Brassage", 0, 0, 'C')
+    pdf.cell(0, 10, "Généré par Beer Master - L'application des brasseurs amateurs", 0, 0, 'C')
     
     return pdf.output(dest='S').encode('latin-1', 'replace')
 
@@ -137,9 +191,7 @@ with c_logo2:
     except:
         pass
 
-# MODIF : Suppression de l'emoji bière
 st.markdown('<h1 class="main-title">Beer Master</h1>', unsafe_allow_html=True)
-# MODIF : Texte agrandi via CSS
 st.markdown('<p class="sub-title">Le générateur de recettes</p>', unsafe_allow_html=True)
 
 # ==========================================
@@ -238,8 +290,11 @@ if st.session_state.recette_generee:
     if "Fumé" in aromes_clean: malt_base_nom = "Malt Fumé (Beechwood)"
     if "Caramel" in aromes_clean and style != "Ambrée": malt_spe_nom += " + Malt Crystal 150"
 
-    poids_base = total_malt * ratio_base
-    poids_spe = total_malt * ratio_spe
+    # Calcul des poids AVEC ARRONDI 0.05
+    poids_base = round_grain(total_malt * ratio_base)
+    poids_spe = round_grain(total_malt * ratio_spe)
+    # Recalcul du total affiché pour être cohérent avec les arrondis
+    total_grain_affiche = poids_base + poids_spe
 
     # --- 2. CALCULS HOUBLONS ---
     if "Agrumes" in aromes_clean: houblon_arome = "Citra & Amarillo"
@@ -264,21 +319,42 @@ if st.session_state.recette_generee:
         nb_sachets = 2; poids_levure = 23
 
     # --- 4. CALCULS EAU ---
-    eau_empatage = total_malt * 3.0
-    absorption = total_malt * 1.0
+    eau_empatage = total_grain_affiche * 3.0
+    absorption = total_grain_affiche * 1.0
     volume_pre_ebu = volume * 1.15 
     jus_recupere = eau_empatage - absorption
     eau_rincage = volume_pre_ebu - jus_recupere
     if eau_rincage < 0: eau_rincage = 0
 
-    # --- AFFICHAGE RECETTE ---
+    # --- PRÉPARATION LISTES POUR PDF ---
+    malt_list_export = [
+        (poids_base, malt_base_nom),
+        (poids_spe, malt_spe_nom)
+    ]
+    
+    houblons_export = [
+        (int(grammes_amer), houblon_amer, "60 min", "Amérisant"),
+        (int(grammes_arome), houblon_arome, "5 min", "Aromatique")
+    ]
+    if "Tropical" in aromes_clean or "Agrumes" in aromes_clean:
+         houblons_export.append((int(grammes_arome), houblon_arome, "3 jours", "Dry Hop"))
+
+    process_export = {
+        "eau_emp": f"{eau_empatage:.1f}",
+        "temp_emp": temp_empatage,
+        "eau_rinc": f"{eau_rincage:.1f}",
+        "temps_ebu": temps_ebu,
+        "temp_ferm": temp_ferm
+    }
+
+    # --- AFFICHAGE RECETTE ECRAN ---
     st.header(f"📜 Fiche Technique : {style} {', '.join(aromes_clean)}")
 
     c1, c2 = st.columns(2)
     with c1:
         with st.container(border=True):
             st.markdown("### 🌾 Bill of Materials")
-            st.write(f"**Total Grains : {total_malt} kg**")
+            st.write(f"**Total Grains : {total_grain_affiche:.2f} kg**")
             st.write(f"- **{poids_base:.2f} kg** : {malt_base_nom}")
             st.write(f"- **{poids_spe:.2f} kg** : {malt_spe_nom}")
             st.markdown("---")
@@ -288,20 +364,14 @@ if st.session_state.recette_generee:
     with c2:
         with st.container(border=True):
             st.markdown("### 🌿 Houblonnage")
-            st.write(f"1️⃣ **Amérisant (60min)** : {int(grammes_amer)}g de {houblon_amer}")
-            st.write(f"2️⃣ **Aromatique (5min)** : {int(grammes_arome)}g de **{houblon_arome}**")
-            
-            dryhop_txt = ""
-            if "Tropical" in aromes_clean or "Agrumes" in aromes_clean:
-                 dryhop_txt = f"{int(grammes_arome)}g de {houblon_arome}"
-                 st.write(f"3️⃣ **Dry Hop (J+4)** : {dryhop_txt}")
+            for h_poids, h_nom, h_temps, h_usage in houblons_export:
+                st.write(f"- **{h_poids}g** {h_nom} ({h_usage} - {h_temps})")
 
     # --- PROCESSUS & EAU ---
     st.subheader("⏳ Profil de Brassage & Volumes d'Eau")
     
     col_p1, col_p2, col_p3, col_p4 = st.columns(4)
     
-    # MODIF : Ajout explicite de "60 min" dans le label
     col_p1.metric("1. Empâtage (60 min)", f"{temp_empatage}°C", f"Eau: {eau_empatage:.1f} L")
     col_p2.metric("2. Rinçage", "75°C", f"Eau: {eau_rincage:.1f} L")
     col_p3.metric("3. Ébullition", f"{temps_ebu} min", "100°C")
@@ -309,14 +379,11 @@ if st.session_state.recette_generee:
 
     # --- BOUTON PDF (NOUVEAU) ---
     st.write("")
-    pdf_bytes = create_pdf(style, aromes_clean, total_malt, 
-                           f"{poids_base:.2f} kg : {malt_base_nom}", 
-                           f"{poids_spe:.2f} kg : {malt_spe_nom}", 
-                           levure, 
-                           f"{int(grammes_amer)}g de {houblon_amer}", 
-                           f"{int(grammes_arome)}g de {houblon_arome}", 
-                           dryhop_txt,
-                           f"{eau_empatage:.1f}", f"{eau_rincage:.1f}")
+    pdf_bytes = create_pdf(style, aromes_clean, volume, degre_vise,
+                           malt_list_export, 
+                           (poids_levure, levure), 
+                           houblons_export,
+                           process_export)
     
     st.download_button(label="📥 TÉLÉCHARGER MA RECETTE EN PDF", 
                        data=pdf_bytes, 
