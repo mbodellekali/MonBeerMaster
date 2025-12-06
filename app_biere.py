@@ -4,7 +4,7 @@ import os
 import math
 
 # --- CONFIGURATION INITIALE ---
-st.set_page_config(page_title="Beer Factory", page_icon="🍺", layout="wide")
+st.set_page_config(page_title="Beer Factory", page_icon="🏭", layout="wide")
 
 # --- DATA: BASE DE DONNÉES INGRÉDIENTS ---
 MALTS_DB = {
@@ -32,56 +32,84 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS (ORIGINAL) ---
+# --- STYLE CSS (NOUVEAU LOOK FACTORY) ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rye&family=Poppins:wght@300;600&display=swap');
+    /* Import des polices Industrial Stencil & Technical Mono */
+    @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Roboto+Mono:wght@400;700&display=swap');
     
     .main-title {
-        font-family: 'Rye', serif;
-        font-size: 4em;
+        font-family: 'Black Ops One', cursive;
+        font-size: 4.5em;
         text-align: center;
-        color: #e67e22; 
+        color: #2c3e50; 
+        text-transform: uppercase;
+        letter-spacing: 3px;
         margin-bottom: 0px;
-        text-shadow: 2px 2px 0px #000;
+        text-shadow: 2px 2px 0px #bdc3c7;
     }
     
     .sub-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: 2.5em;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 1.2em;
         text-align: center;
-        color: #555;
+        color: #7f8c8d;
         font-weight: bold;
-        font-style: italic;
-        margin-top: -10px;
+        text-transform: uppercase;
+        margin-top: -5px;
         margin-bottom: 40px;
+        border-top: 2px solid #2c3e50;
+        border-bottom: 2px solid #2c3e50;
+        display: inline-block;
+        padding: 5px 20px;
+    }
+    
+    /* Centre le sous-titre hack */
+    div[data-testid="stMarkdownContainer"] > p.sub-title {
+        display: table;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     h1, h2, h3 {
-        font-family: 'Rye', serif !important;
-        color: #2c3e50;
+        font-family: 'Black Ops One', cursive !important;
+        color: #34495e;
+        letter-spacing: 1px;
+    }
+    
+    /* Les textes normaux en mode "fiche technique" */
+    p, .stMarkdown, .stText {
+        font-family: 'Roboto Mono', monospace !important;
     }
 
     div.stButton > button {
-        background-color: #e67e22;
+        background-color: #2c3e50;
         color: white !important;
-        border-radius: 10px;
-        font-family: 'Rye', serif;
+        border-radius: 0px; /* Boutons carrés industriels */
+        font-family: 'Black Ops One', cursive;
         font-size: 1.4rem;
-        border: none;
+        border: 2px solid #000;
         padding: 0.6rem 1rem;
-        letter-spacing: 1px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        box-shadow: 4px 4px 0px #7f8c8d; /* Ombre dure */
     }
     div.stButton > button:hover {
-        background-color: #d35400;
-        border: 2px solid #e67e22;
-        color: #fff !important;
+        background-color: #34495e;
+        box-shadow: 2px 2px 0px #7f8c8d;
+        transform: translate(2px, 2px);
+    }
+    
+    /* Style des inputs plus carré */
+    .stSelectbox div[data-baseweb="select"] > div, .stNumberInput input {
+        border-radius: 0px;
+        font-family: 'Roboto Mono', monospace;
     }
     
     .stSelectbox label, .stNumberInput label, .stSlider label {
-        font-family: 'Rye', serif;
+        font-family: 'Black Ops One', cursive;
         font-size: 1.1em;
-        color: #444;
+        color: #2c3e50;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -114,7 +142,7 @@ class PDF(FPDF):
         if os.path.exists("logo.png"):
             self.image("logo.png", 10, 8, 25)
         self.set_font('Arial', 'B', 24)
-        self.cell(0, 15, 'Beer Factory', 0, 1, 'C')
+        self.cell(0, 15, 'BEER FACTORY', 0, 1, 'C')
         self.ln(5)
 
 def create_pdf_compact(data):
@@ -124,14 +152,14 @@ def create_pdf_compact(data):
     
     # Infos Styles
     pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 8, f"Fiche de Brassage : {data['style']}", ln=True, align='C')
-    pdf.set_font("Arial", 'I', 11)
+    pdf.cell(0, 8, f"Fiche de Production : {data['style']}", ln=True, align='C')
+    pdf.set_font("Courier", '', 11) # Police Courier pour le PDF aussi (style machine à écrire)
     aromes_txt = ", ".join(data['aromes']).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 6, f"Profil : {aromes_txt}", ln=True, align='C')
     pdf.ln(5)
 
     # BANDEAU TECHNIQUE
-    pdf.set_fill_color(230, 230, 230)
+    pdf.set_fill_color(220, 220, 220)
     pdf.set_font("Arial", 'B', 10)
     info_str = f"Vol: {data['volume']}L | ABV: {data['abv']}% | OG: {data['og']:.3f} | IBU: {int(data['ibu'])} | EBC: {int(data['ebc'])} | Eff: {int(data['eff']*100)}%"
     pdf.cell(0, 10, info_str, 1, 1, 'C', fill=True)
@@ -139,7 +167,7 @@ def create_pdf_compact(data):
 
     # 1. GRAINS
     pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "1. Grains & Fermentescibles", ln=True)
-    pdf.set_font("Arial", '', 10)
+    pdf.set_font("Courier", '', 10)
     
     h_line = 6
     pdf.set_fill_color(245, 245, 245)
@@ -155,13 +183,13 @@ def create_pdf_compact(data):
         pdf.cell(25, h_line, f"{grain['ratio']*100:.0f} %", 1, 1, 'C')
         total_grain += grain['poids']
     
-    pdf.set_font("Arial", 'B', 10)
+    pdf.set_font("Courier", 'B', 10)
     pdf.cell(165, h_line, f"Total : {total_grain:.2f} kg", 0, 1, 'R')
     pdf.ln(5)
 
     # 2. HOUBLONS
     pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "2. Houblonnage", ln=True)
-    pdf.set_font("Arial", '', 10)
+    pdf.set_font("Courier", '', 10)
     
     pdf.cell(25, h_line, "Poids", 1, 0, 'C', True)
     pdf.cell(60, h_line, "Variete", 1, 0, 'L', True)
@@ -177,20 +205,20 @@ def create_pdf_compact(data):
 
     # 3. PROCESS
     pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "3. Processus", ln=True)
-    pdf.set_font("Arial", '', 10)
+    pdf.set_font("Courier", '', 10)
     pdf.cell(95, 8, f"Empatage: {data['eau_emp']:.1f} L (67 C - 60min)", 1)
     pdf.cell(95, 8, f"Rincage: {data['eau_rinc']:.1f} L (75 C)", 1, 1)
     pdf.cell(95, 8, f"Ebullition: 60 min (100 C)", 1)
     pdf.cell(95, 8, f"Fermentation: ~15 jours", 1, 1)
     pdf.ln(5)
     
-    pdf.set_font("Arial", 'B', 10)
+    pdf.set_font("Courier", 'B', 10)
     pdf.cell(0, 8, f"Levure : {data['levure']}", 0, 1, 'L')
 
     # Footer
     pdf.set_y(-15)
-    pdf.set_font("Arial", 'I', 8)
-    pdf.cell(0, 10, "Genere par Beer Factory - L'application des brasseurs amateurs", 0, 0, 'C')
+    pdf.set_font("Courier", 'I', 8)
+    pdf.cell(0, 10, "Genere par Beer Factory - Systeme de Production", 0, 0, 'C')
 
     return pdf.output(dest='S').encode('latin-1')
 
@@ -202,7 +230,7 @@ with c_logo2:
     except: pass
 
 st.markdown('<h1 class="main-title">Beer Factory</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Le générateur de recettes</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">/// PRODUCTION UNIT v2.0 ///</p>', unsafe_allow_html=True)
 
 # ==========================================
 # PARTIE 1 : RÉGLAGES
@@ -223,8 +251,8 @@ with st.container(border=True):
     col_gauche, col_droite = st.columns(2)
     
     with col_gauche:
-        st.subheader("Le Style")
-        style = st.selectbox("Quel style de bière ?", list(definitions_styles.keys()))
+        st.subheader("1. TYPE DE PRODUCTION")
+        style = st.selectbox("Style de bière", list(definitions_styles.keys()))
         st.info(definitions_styles[style])
         
         c1, c2 = st.columns(2)
@@ -232,7 +260,7 @@ with st.container(border=True):
         degre_vise = c2.slider("Degré alcool (%)", 3.0, 12.0, 6.0, 0.1)
 
     with col_droite:
-        st.subheader("La Palette Aromatique")
+        st.subheader("2. PARAMÈTRES AROMATIQUES")
         
         options_aromes = [
             "🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", 
@@ -249,7 +277,7 @@ with st.container(border=True):
         
         trop_d_aromes = False
         if len(aromes_selectionnes) > 2:
-            st.warning("⚠️ Trop d'arômes tuent l'arôme ! Choisissez-en **2 maximum**.")
+            st.warning("⚠️ Surdosage aromatique détecté ! Choisissez-en 2 maximum.")
             trop_d_aromes = True
         
         st.write("") 
@@ -261,7 +289,7 @@ st.write("")
 
 col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
 with col_btn2:
-    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
+    if st.button("LANCER LE CALCUL DE RECETTE", type="primary", use_container_width=True, disabled=trop_d_aromes):
         st.session_state.recette_generee = True
 
 st.divider()
@@ -273,7 +301,7 @@ st.divider()
 if st.session_state.recette_generee:
     
     # 0. PARAMETRES TECHNIQUES
-    efficacite = 0.75 # 75% d'efficacité par défaut
+    efficacite = 0.75 
 
     # 1. LOGIQUE INGRÉDIENTS
     malt_base_nom = "Pilsner"; malt_spe_nom = "Blé (Froment)"
@@ -338,16 +366,14 @@ if st.session_state.recette_generee:
     if eau_rincage < 0: eau_rincage = 0
 
     # 3. AFFICHAGE
-    st.header(f"📜 Fiche Technique : {style} {', '.join(aromes_clean)}")
+    st.header(f"/// FICHE TECHNIQUE : {style.upper()} ///")
 
     c1, c2 = st.columns(2)
     with c1:
         with st.container(border=True):
-            # MODIFICATION 1 : Changement du titre
             st.markdown("### 🌾 Grains & Fermentescibles")
-            # MODIFICATION 2 : Ajout de l'efficacité
             st.write(f"**Total Grains : {total_grain_affiche:.2f} kg**")
-            st.caption(f"Calculé pour une efficacité de {int(efficacite*100)}% | EBC: {int(ebc_estime)}")
+            st.caption(f"Calculé pour efficacité {int(efficacite*100)}% | EBC: {int(ebc_estime)}")
             
             st.write(f"- **{poids_base:.2f} kg** : {malt_base_nom}")
             st.write(f"- **{poids_spe:.2f} kg** : {malt_spe_nom}")
@@ -362,12 +388,12 @@ if st.session_state.recette_generee:
             st.write(f"- **{int(grammes_arome)}g** {houblon_arome} (Aromatique - 5min)")
             st.markdown(f"**IBU Cible : {int(ibu_target)}**")
 
-    st.subheader("⏳ Profil de Brassage & Volumes d'Eau")
+    st.subheader("⏳ Profil de Brassage")
     col_p1, col_p2, col_p3, col_p4 = st.columns(4)
     col_p1.metric("1. Empâtage (60 min)", f"67°C", f"Eau: {eau_empatage:.1f} L")
     col_p2.metric("2. Rinçage", "75°C", f"Eau: {eau_rincage:.1f} L")
     
-    # MODIFICATION 3 : Inversion pour l'ébullition (100°C en gros, 60 min en petit)
+    # Inversion demandée : 100°C en gros
     col_p3.metric("3. Ébullition", "100°C", "60 min")
     
     col_p4.metric("4. Fermentation", f"20°C", "~15 jours")
@@ -390,12 +416,12 @@ if st.session_state.recette_generee:
     
     pdf_bytes = create_pdf_compact(recette_data)
     
-    st.download_button(label="📥 TÉLÉCHARGER MA RECETTE EN PDF", 
+    st.download_button(label="📥 TÉLÉCHARGER LA FICHE DE PROD (PDF)", 
                        data=pdf_bytes, 
                        file_name=f"BeerFactory_{style}.pdf", 
                        mime='application/pdf', 
                        use_container_width=True)
 
 else:
-    st.info("👆 Configurez vos préférences ci-dessus et cliquez sur le bouton.")
+    st.info("👆 Configurez la ligne de production ci-dessus.")
     for _ in range(5): st.write("")
