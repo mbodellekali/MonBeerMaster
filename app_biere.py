@@ -37,19 +37,17 @@ st.markdown("""
         --text-dark: #1a120b;
     }
 
-    /* 1. CADRE EXTERIEUR MASSIF (FIXÉ) */
+    /* 1. CADRE EXTERIEUR MASSIF */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: 'Roboto', sans-serif;
         
-        /* Force le cadre, padding pour éviter que le contenu touche le cadre */
         border: 50px solid var(--dark-brown);
         box-shadow: inset 0 0 0 5px var(--primary-amber);
         padding: 20px; 
     }
     
-    /* Adaptation mobile : on réduit le cadre sinon c'est illisible */
     @media (max-width: 640px) {
         .stApp {
             border: 15px solid var(--dark-brown);
@@ -57,7 +55,7 @@ st.markdown("""
         }
     }
 
-    /* 2. MODULES INTERNES (CADRES) */
+    /* 2. MODULES INTERNES */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
         border: 6px solid var(--dark-brown) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
@@ -132,34 +130,24 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- CORRECTION CRITIQUE ST.PILLS (AROMES) --- */
-    
-    /* 1. État par défaut (Non sélectionné) */
+    /* --- PILLS (AROMES) --- */
     [data-testid="stPills"] button {
-        background-color: #ffffff !important; /* Blanc */
+        background-color: #ffffff !important; 
         border: 2px solid var(--dark-brown) !important;
         transition: all 0.2s;
     }
-    
-    /* Texte par défaut */
     [data-testid="stPills"] button p {
-        color: var(--dark-brown) !important; /* Marron foncé */
+        color: var(--dark-brown) !important; 
         font-weight: 700 !important;
         font-family: 'Roboto', sans-serif;
     }
-    
-    /* 2. État SÉLECTIONNÉ */
     [data-testid="stPills"] button[aria-selected="true"] {
-        background-color: var(--primary-amber) !important; /* Ambre */
+        background-color: var(--primary-amber) !important; 
         border-color: var(--dark-brown) !important;
     }
-    
-    /* Texte quand sélectionné */
     [data-testid="stPills"] button[aria-selected="true"] p {
-        color: #ffffff !important; /* Blanc */
+        color: #ffffff !important; 
     }
-    
-    /* 3. Survol */
     [data-testid="stPills"] button:hover {
         border-color: var(--primary-amber) !important;
         transform: scale(1.02);
@@ -265,7 +253,10 @@ with st.container(border=True):
         st.caption(definitions_styles[style])
         
         c_v, c_a = st.columns(2)
-        volume = c_v.number_input("Volume (L)", 5, 100, 20)
+        
+        # MODIFICATION DU VOLUME : SLIDER 10L - 100L (Pas de 10)
+        volume = c_v.slider("Volume (L)", 10, 100, 20, 10)
+        
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
         
         st.write("")
@@ -279,8 +270,6 @@ with st.container(border=True):
         
         options_aromes = ["🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", "☕ Café", "🍫 Chocolat", "🍮 Caramel", "🍪 Biscuit", "🥓 Fumé", "🌶️ Épices", "🌸 Floral"]
         
-        # UTILISATION DE ST.PILLS (BOUTONS CLIQUABLES)
-        # selection_mode="multi" permet de sélectionner plusieurs
         aromes_selectionnes = st.pills(
             "Sélectionnez 2 arômes maximum :",
             options_aromes,
