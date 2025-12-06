@@ -93,31 +93,45 @@ st.markdown("""
         font-family: 'Rye', serif;
     }
 
-    /* BOUTONS GENERAUX (Générer) */
+    /* --- STABILISATION DES BOUTONS --- */
     div.stButton > button {
-        border: 3px solid var(--dark-brown); border-radius: 4px; 
+        border: 3px solid var(--dark-brown) !important; /* Important pour éviter le changement de taille */
+        border-radius: 4px; 
         font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
-        box-shadow: 4px 4px 0px var(--dark-brown); transition: all 0.1s;
+        box-shadow: 4px 4px 0px var(--dark-brown); 
         width: 100%;
-        font-family: 'Rye', serif;
+        min-height: 60px !important; /* Hauteur fixe pour éviter le saut */
+        margin: 0px !important;
     }
     
-    /* Bouton Principal (Générer) */
+    /* Bouton Principal (Sélectionné / Générer) */
     div.stButton > button[kind="primary"] {
-        background-color: var(--primary-amber); color: white !important;
-        font-size: 1.3rem; padding: 0.8rem 1.5rem;
+        background-color: var(--primary-amber) !important; 
+        color: white !important;
+        font-size: 1.3rem; 
     }
     
-    /* Bouton Secondaire (Arômes non sélectionnés) */
+    /* Bouton Secondaire (Non sélectionné) */
     div.stButton > button[kind="secondary"] {
-        background-color: #ffffff; color: var(--dark-brown) !important;
-        font-size: 1.5rem; /* Gros Emoji */
-        padding: 0.2rem 0rem;
+        background-color: #ffffff !important; 
+        color: var(--dark-brown) !important;
+        font-size: 1.5rem; 
     }
     
+    /* Effet survol (sans changement de taille) */
     div.stButton > button:hover {
-        transform: translate(1px, 1px);
+        background-color: #f0f0f0; 
+        border-color: var(--dark-brown) !important;
+        color: var(--dark-brown);
+    }
+    div.stButton > button[kind="primary"]:hover {
+        background-color: #d35400 !important;
+        color: white !important;
+    }
+    
+    div.stButton > button:active {
         box-shadow: 2px 2px 0px var(--dark-brown);
+        transform: translate(2px, 2px);
     }
 
     /* INPUTS */
@@ -277,14 +291,11 @@ with st.container(border=True):
             cols = st.columns(cols_per_row)
             for i, (emoji, name) in enumerate(row):
                 with cols[i]:
-                    # Étiquette
                     st.markdown(f'<div class="btn-label">{name}</div>', unsafe_allow_html=True)
                     
-                    # État du bouton
                     is_selected = emoji in st.session_state.selected_aromas
                     btn_type = "primary" if is_selected else "secondary"
                     
-                    # Bouton
                     if st.button(emoji, key=f"btn_{emoji}", type=btn_type, use_container_width=True):
                         if is_selected:
                             st.session_state.selected_aromas.remove(emoji)
@@ -307,9 +318,10 @@ except:
 
 st.write("")
 
-c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
+c_b1, c_b2, c_b3 = st.columns([1, 1, 1])
 with c_b2:
-    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True):
+    st.markdown('<div class="btn-label">GÉNÉRER MA RECETTE</div>', unsafe_allow_html=True)
+    if st.button("🍺", type="primary", use_container_width=True):
         st.session_state.recette_generee = True
 
 st.write("")
@@ -433,5 +445,5 @@ if st.session_state.recette_generee:
         
         col_dl1, col_dl2, col_dl3 = st.columns([1, 1, 1])
         with col_dl2:
-            st.markdown('<div class="btn-label">TÉLÉCHARGER MA FICHE</div>', unsafe_allow_html=True)
+            st.markdown('<div class="btn-label">TÉLÉCHARGER MA RECETTE</div>', unsafe_allow_html=True)
             st.download_button(label="📥", data=pdf_bytes, file_name=f"BeerFactory_{style}.pdf", mime='application/pdf', use_container_width=True)
