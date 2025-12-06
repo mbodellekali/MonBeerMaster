@@ -61,7 +61,7 @@ st.markdown("""
         font-weight: 400;
         letter-spacing: 1px;
         text-align: center !important;
-        font-size: 3rem !important; /* Taille réduite */
+        font-size: 3rem !important; 
         line-height: 1.1;
         margin-bottom: -10px !important;
     }
@@ -118,45 +118,42 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- CSS SPÉCIFIQUE LISTE AROMES COMPACTE --- */
+    /* --- STYLE LISTE AROMES --- */
+    div[data-testid="column"] { padding: 0px !important; }
     
-    /* Réduction des marges entre les colonnes de Streamlit pour cette section */
-    div[data-testid="column"] {
-        padding: 0px !important;
-    }
-    
-    /* Style du texte des arômes */
     .aroma-label {
         font-weight: bold;
         color: var(--dark-brown);
         font-size: 1.1rem;
-        padding-top: 5px; /* Alignement avec le toggle */
+        padding-top: 5px; 
     }
-    
-    .aroma-emoji {
-        font-size: 1.5rem;
-    }
+    .aroma-emoji { font-size: 1.5rem; }
 
-    /* CUSTOM TOGGLES (Interrupteurs) */
+    /* --- CUSTOM TOGGLES (MODIFIÉ POUR VISIBILITÉ) --- */
     div[data-baseweb="checkbox"] {
         margin-bottom: 0px !important;
         margin-top: 0px !important;
     }
-    /* Piste inactive */
+    
+    /* Piste inactive : MAINTENANT EN MARRON FONCÉ */
     div[data-baseweb="checkbox"] > div {
-        background-color: #5d4037 !important; /* Marron visible */
+        background-color: var(--dark-brown) !important; 
+        border: 1px solid var(--primary-amber); /* Petit contour ambre */
         height: 24px !important;
         width: 44px !important;
     }
-    /* Bouton */
+    
+    /* Bouton (Rond) : BLANC */
     div[data-baseweb="checkbox"] > div > div {
         background-color: #ffffff !important;
         height: 20px !important;
         width: 20px !important;
     }
-    /* Piste active */
+    
+    /* Piste active : AMBRE */
     div[data-baseweb="checkbox"][aria-checked="true"] > div {
         background-color: var(--primary-amber) !important;
+        border-color: var(--dark-brown);
     }
     
     /* METRICS */
@@ -238,7 +235,7 @@ st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; fo
 st.write("")
 
 # ==========================================
-# CONFIGURATION
+# MODULE 1 : CONFIGURATION
 # ==========================================
 
 with st.container(border=True): 
@@ -280,32 +277,22 @@ with st.container(border=True):
         
         selected_aromas_list_full = []
         
-        # LISTE COMPACTE ET SERRÉE
-        # On évite les conteneurs Streamlit pour réduire les marges, on fait du direct
         for a in options_aromes_avec_emoji:
-            # Séparation Emoji / Nom
-            emoji = a.split(" ")[0]
-            nom = a.split(" ")[1]
-            
-            # Colonnes: [Emoji] [Nom] [Toggle (Aligné à droite)]
-            # On utilise des ratios précis pour que tout soit aligné
             c_icon, c_name, c_tgl = st.columns([0.15, 0.65, 0.2])
-            
             is_on = st.session_state.get(f"toggle_{a}", False)
             should_disable = (active_count >= 2) and (not is_on)
             
             with c_icon:
-                st.markdown(f"<div class='aroma-emoji'>{emoji}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='aroma-emoji'>{a.split(' ')[0]}</div>", unsafe_allow_html=True)
             with c_name:
-                st.markdown(f"<div class='aroma-label'>{nom}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='aroma-label'>{a.split(' ')[1]}</div>", unsafe_allow_html=True)
             with c_tgl:
                 if st.toggle("", key=f"toggle_{a}", disabled=should_disable):
                     selected_aromas_list_full.append(a)
             
-            # Espacement vertical minime manuel pour serrer les lignes
             st.markdown("<div style='margin-bottom: -15px;'></div>", unsafe_allow_html=True)
 
-        st.write("") # Petit espace après la liste
+        st.write("") 
         if active_count >= 2:
             st.caption("🔒 *Max 2 arômes atteints.*")
 
