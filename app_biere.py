@@ -147,13 +147,6 @@ st.markdown("""
         font-size: 1.3rem; padding: 0.8rem 1.5rem;
     }
     
-    /* Bouton Secondaire (Arômes) */
-    div.stButton > button[kind="secondary"] {
-        background-color: #ffffff; color: var(--dark-brown) !important;
-        font-size: 1.5rem; /* Gros Emoji */
-        padding: 0.2rem 0rem;
-    }
-    
     div.stButton > button:hover {
         transform: translate(1px, 1px);
         box-shadow: 2px 2px 0px var(--dark-brown);
@@ -189,6 +182,12 @@ st.markdown("""
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     
+    /* TOGGLE STYLING */
+    div[data-baseweb="checkbox"] label {
+        color: var(--dark-brown) !important;
+        font-weight: bold;
+    }
+
     /* CARTES PROCESSUS */
     .process-card {
         background-color: #ffffff; border: 4px solid var(--dark-brown);
@@ -329,39 +328,44 @@ with st.container(border=True):
     with col2:
         st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES (MAX 2)</p>', unsafe_allow_html=True)
         
-        cols_per_row = 4
+        # Passage à 3 colonnes pour avoir de la largeur pour le texte + le switch
+        cols_per_row = 3
         rows = [AROMA_DATA[i:i + cols_per_row] for i in range(0, len(AROMA_DATA), cols_per_row)]
         
         for row in rows:
             cols = st.columns(cols_per_row)
             for i, (emoji, name) in enumerate(row):
                 with cols[i]:
-                    st.markdown(f'<div class="btn-label">{name}</div>', unsafe_allow_html=True)
-                    
+                    # Vérification état
                     is_selected = emoji in st.session_state.selected_aromas
-                    btn_type = "primary" if is_selected else "secondary"
                     
-                    if st.button(emoji, key=f"btn_{emoji}", type=btn_type, use_container_width=True):
-                        if is_selected:
-                            st.session_state.selected_aromas.remove(emoji)
-                            st.rerun()
-                        else:
+                    # Le toggle combine le Label et le Switch côte à côte
+                    toggle_val = st.toggle(f"{name} {emoji}", value=is_selected, key=f"t_{emoji}")
+                    
+                    # Logique de changement d'état
+                    if toggle_val != is_selected:
+                        if toggle_val:
+                            # Tentative d'activation
                             if len(st.session_state.selected_aromas) < 2:
                                 st.session_state.selected_aromas.append(emoji)
                                 st.rerun()
                             else:
-                                st.toast("⚠️ Maximum 2 arômes ! Désélectionnez-en un d'abord.", icon="🚫")
+                                st.toast("⚠️ Maximum 2 arômes ! Désactivez-en un d'abord.", icon="🚫")
+                                st.rerun()
+                        else:
+                            # Désactivation
+                            st.session_state.selected_aromas.remove(emoji)
+                            st.rerun()
 
 # ==========================================
 # TRANSITION
 # ==========================================
-st.write("")
+
+# Suppression des st.write("") pour réduire l'espace
 try:
     st.image("frise.png", use_container_width=True)
 except:
     st.markdown("---") 
-
-st.write("")
 
 c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
