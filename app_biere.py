@@ -24,7 +24,7 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS ARCHITECTURAL ---
+# --- STYLE CSS ARCHITECTURAL (CADRE EPAIS) ---
 st.markdown("""
     <style>
     /* Import Police Artisanale "Rye" */
@@ -37,14 +37,30 @@ st.markdown("""
         --text-dark: #222222;
     }
 
-    /* 1. FOND DE PAGE */
+    /* 1. FOND DE PAGE & CADRE MASSIF */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        
+        /* LE CADRE MASSIF (60px) */
+        border: 60px solid var(--dark-slate); 
+        
+        /* Liseré interne Ambre */
+        box-shadow: inset 0 0 0 6px var(--primary-amber); 
+        
+        margin: 0px;
+    }
+    
+    /* Adaptation Mobile (Sinon le cadre mange tout l'écran sur téléphone) */
+    @media (max-width: 640px) {
+        .stApp {
+            border: 15px solid var(--dark-slate);
+            box-shadow: inset 0 0 0 3px var(--primary-amber); 
+        }
     }
 
-    /* 2. MODULES (CADRES) */
+    /* 2. MODULES INTERNES (CADRES) */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
         border: 8px solid var(--dark-slate) !important;
         box-shadow: inset 0 0 0 3px var(--primary-amber) !important;
@@ -56,13 +72,14 @@ st.markdown("""
 
     /* TITRES */
     h1 {
-        font-family: 'Rye', serif !important; /* Police Artisanale */
+        font-family: 'Rye', serif !important;
         color: var(--dark-slate) !important; 
         text-transform: uppercase; 
-        font-weight: 400; /* Rye est déjà gras par nature */
+        font-weight: 400;
         letter-spacing: 2px;
-        text-align: center !important; /* Centrage forcé */
+        text-align: center !important;
         font-size: 4rem !important;
+        margin-bottom: -15px !important;
     }
     
     h2, h3 { 
@@ -79,7 +96,7 @@ st.markdown("""
         padding-bottom: 5px; display: inline-block; text-transform: uppercase;
     }
 
-    /* BOUTONS */
+    /* BOUTONS GÉNÉRAUX */
     div.stButton > button {
         background-color: var(--primary-amber); color: white !important;
         border: 3px solid var(--dark-slate);
@@ -113,18 +130,33 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* STYLE LISTE IPHONE (Custom Toggle Container) */
+    /* --- STYLE LISTE AROMES --- */
     .aroma-row {
-        border-bottom: 1px solid #ddd;
-        padding-top: 5px;
-        padding-bottom: 5px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    /* --- CUSTOMISATION DES TOGGLES (INTERRUPTEURS) --- */
+    div[data-baseweb="checkbox"] {
+        transform: scale(1.3); 
+        transform-origin: right center;
+    }
+    div[data-baseweb="checkbox"] > div {
+        background-color: var(--dark-slate) !important;
+    }
+    div[data-baseweb="checkbox"] > div > div {
+        background-color: #ffffff !important;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    div[data-baseweb="checkbox"][aria-checked="true"] > div {
+        background-color: var(--primary-amber) !important;
     }
     
     /* METRICS */
     div[data-testid="stMetricLabel"] { color: var(--dark-slate); font-weight: 700; text-transform: uppercase;}
     div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; }
     
-    .block-container { padding-top: 2rem; padding-bottom: 5rem; }
+    .block-container { padding-top: 1rem; padding-bottom: 5rem; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -185,26 +217,27 @@ def create_pdf_compact(data):
     return pdf.output(dest='S').encode('latin-1')
 
 # ==========================================
-# HEADER
+# HEADER COMPACTÉ
 # ==========================================
 
 st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
 
-# LOGO (CENTRÉ)
-c1, c2, c3 = st.columns([1.5, 1, 1.5])
+# LOGO PLUS PETIT ET RAPPROCHÉ
+c1, c2, c3 = st.columns([2, 0.8, 2]) 
 with c2:
     try: st.image("logo.png", use_container_width=True)
     except: pass
 
-st.markdown('<p style="text-align: center; color: #C27818; margin-top: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">LE GÉNÉRATEUR DE RECETTES DE BIÈRES</p>', unsafe_allow_html=True)
+# SOUS-TITRE RAPPROCHÉ
+st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">LE GÉNÉRATEUR DE RECETTES DE BIÈRES</p>', unsafe_allow_html=True)
 st.write("")
 
 # ==========================================
-# MODULE 1 : CONFIGURATION (ENCADRÉ)
+# MODULE 1 : CONFIGURATION
 # ==========================================
 
-with st.container(border=True): # Cadre visuel 1
-    col1, col2 = st.columns([1, 1], gap="large")
+with st.container(border=True): 
+    col1, col2 = st.columns(2, gap="large")
     
     with col1:
         st.markdown('<p class="subheader-text">1. TYPE DE BIÈRE</p>', unsafe_allow_html=True)
@@ -233,45 +266,31 @@ with st.container(border=True): # Cadre visuel 1
     with col2:
         st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES</p>', unsafe_allow_html=True)
         
-        options_aromes = ["Agrumes", "Tropical", "Pin", "Banane", "Café", "Chocolat", "Caramel", "Biscuit", "Fumé", "Épices", "Floral"]
+        options_aromes_avec_emoji = ["🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", "☕ Café", "🍫 Chocolat", "🍮 Caramel", "🍪 Biscuit", "🥓 Fumé", "🌶️ Épices", "🌸 Floral"]
         
-        # LOGIQUE DE COMPTAGE POUR LA LIMITATION
-        # On compte combien sont actifs actuellement
         active_count = 0
-        for a in options_aromes:
+        for a in options_aromes_avec_emoji:
             if st.session_state.get(f"toggle_{a}", False):
                 active_count += 1
         
-        selected_aromas_list = []
+        selected_aromas_list_full = []
         
-        # LISTE "STYLE IPHONE"
-        # On utilise une boucle pour créer les lignes
-        for a in options_aromes:
-            # Layout : Colonne Texte (gauche) | Colonne Toggle (droite)
+        # Boucle d'affichage des arômes
+        for a in options_aromes_avec_emoji:
             c_txt, c_tgl = st.columns([4, 1])
-            
-            # État actuel de ce toggle
             is_on = st.session_state.get(f"toggle_{a}", False)
-            
-            # Est-ce qu'on doit le désactiver ? 
-            # OUI si (on a déjà 2 actifs) ET (celui-ci n'est pas actif)
             should_disable = (active_count >= 2) and (not is_on)
             
-            # Affichage du texte
-            c_txt.markdown(f"<div style='padding-top: 10px; font-weight: bold; color: #2C3E50;'>{a}</div>", unsafe_allow_html=True)
+            c_txt.markdown(f"<div class='aroma-row' style='font-weight: bold; color: #2C3E50;'>{a}</div>", unsafe_allow_html=True)
             
-            # Affichage du Toggle
             if c_tgl.toggle("", key=f"toggle_{a}", disabled=should_disable):
-                selected_aromas_list.append(a)
-            
-            # Petit trait de séparation comme sur iPhone
-            st.markdown("<hr style='margin: 0px; border-color: #ddd; opacity: 0.5;'>", unsafe_allow_html=True)
+                selected_aromas_list_full.append(a)
 
         if active_count >= 2:
-            st.caption("🔒 *Max 2 arômes atteints. Décochez-en un pour changer.*")
+            st.caption("🔒 *Max 2 arômes atteints.*")
 
 # ==========================================
-# ZONE DE TRANSITION (FRISE + BOUTON)
+# TRANSITION
 # ==========================================
 st.write("")
 try:
@@ -283,18 +302,18 @@ st.write("")
 
 c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
-    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True):
+    trop_d_aromes = len(selected_aromas_list_full) > 2
+    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
         st.session_state.recette_generee = True
 
 st.write("")
 
 # ==========================================
-# MODULE 2 : RÉSULTATS (ENCADRÉ SÉPARÉ)
+# MODULE 2 : RÉSULTATS
 # ==========================================
 
 if st.session_state.recette_generee:
     
-    # CALCULS
     efficacite = 0.75 
     malt_base_nom = "Pilsner"; malt_spe_nom = "Blé (Froment)"; levure = "US-05 (Neutre)"; houblon_amer = "Magnum"; houblon_arome = "Saaz"; ratio_base = 0.90; ratio_spe = 0.10
     if style == "IPA": malt_base_nom="Pale Ale"; malt_spe_nom="Carapils"; levure="Verdant IPA"; ratio_base=0.93; ratio_spe=0.07 
@@ -304,7 +323,7 @@ if st.session_state.recette_generee:
     elif style == "Saison": malt_base_nom="Pilsner"; malt_spe_nom="Munich"; levure="Belle Saison"
     elif style == "Lager": malt_base_nom="Pilsner"; malt_spe_nom="Vienna"; levure="W-34/70"
     
-    aromes_clean = selected_aromas_list # Utilisation de la nouvelle liste
+    aromes_clean = [a.split(" ")[1] if " " in a else a for a in selected_aromas_list_full]
     
     if "Biscuit" in aromes_clean: malt_spe_nom = "Biscuit"
     if "Fumé" in aromes_clean: malt_base_nom = "Fumé"
@@ -338,9 +357,7 @@ if st.session_state.recette_generee:
         "eau_emp": eau_empatage, "eau_rinc": eau_rincage, "levure": levure
     }
     
-    # AFFICHAGE DANS UN MODULE DISTINCT
-    with st.container(border=True): # Cadre visuel 2
-        
+    with st.container(border=True): 
         st.markdown(f"<h2 style='text-align: center; border-bottom: none;'>FICHE DE PRODUCTION : {style.upper()}</h2>", unsafe_allow_html=True)
         if aromes_clean: st.caption(f"<p style='text-align: center; font-style:italic;'>Notes : {', '.join(aromes_clean)}</p>", unsafe_allow_html=True)
         st.write("")
