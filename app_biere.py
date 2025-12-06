@@ -94,8 +94,14 @@ st.markdown("""
     h1 {
         font-family: 'Rye', serif !important; color: var(--dark-brown) !important; 
         text-transform: uppercase; font-weight: 400; letter-spacing: 1px;
-        text-align: center !important; font-size: 3rem !important; line-height: 1.1;
+        font-size: 3rem !important; line-height: 1.1;
         margin-bottom: -10px !important;
+        
+        /* CORRECTION CENTRAGE ROBUSTE (Flexbox) */
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+        text-align: center !important;
     }
     
     h2, h3 { 
@@ -185,7 +191,7 @@ st.markdown("""
         font-family: 'Roboto', sans-serif; color: #555; font-size: 0.9rem; margin-top: 5px; font-weight: 500;
     }
     
-    /* DESCRIPTION INGRÉDIENTS (GRAINS & HOUBLONS) */
+    /* DESCRIPTION INGRÉDIENTS */
     .ing-desc {
         color: #666;
         font-style: italic;
@@ -215,49 +221,77 @@ def estimate_color(malt_list, volume):
     mcu = sum([(w * props['ebc']) / volume for w, props in malt_list])
     return 2.93 * (mcu * 4.23) ** 0.6859
 
-# --- PDF GENERATOR ---
+# --- PDF GENERATOR (OPTIMISÉ COMPACT 1 PAGE) ---
 class PDF(FPDF):
     def header(self):
-        if os.path.exists("logo.png"): self.image("logo.png", 10, 8, 25)
-        self.set_font('Arial', 'B', 20)
-        self.cell(0, 15, 'BEER FACTORY', 0, 1, 'C')
-        self.ln(5)
+        if os.path.exists("logo.png"): self.image("logo.png", 10, 8, 20) # Logo plus petit
+        self.set_font('Arial', 'B', 18) # Titre plus petit
+        self.cell(0, 10, 'BEER FACTORY', 0, 1, 'C')
+        self.ln(2)
 
 def create_pdf_compact(data):
-    pdf = PDF(); pdf.add_page(); pdf.set_auto_page_break(auto=True, margin=10)
-    pdf.set_font("Arial", 'B', 14); pdf.cell(0, 8, f"Fiche de Production : {data['style'].upper()}", ln=True, align='C')
-    pdf.set_font("Arial", 'I', 11)
+    pdf = PDF(); pdf.add_page(); pdf.set_auto_page_break(auto=True, margin=5)
+    
+    # Titre Recette
+    pdf.set_font("Arial", 'B', 12)
+    pdf.cell(0, 6, f"Fiche : {data['style'].upper()}", ln=True, align='C')
+    
+    # Profil Arome
+    pdf.set_font("Arial", 'I', 9)
     aromes_noms = [AROMA_DICT.get(e, "") for e in data['aromes']]
     aromes_txt = ", ".join(aromes_noms).encode('latin-1', 'replace').decode('latin-1')
-    pdf.cell(0, 6, f"Profil : {aromes_txt}", ln=True, align='C'); pdf.ln(5)
-    pdf.set_fill_color(230, 230, 230); pdf.set_font("Arial", 'B', 10)
+    pdf.cell(0, 5, f"Profil : {aromes_txt}", ln=True, align='C'); pdf.ln(2)
+    
+    # Bandeau Technique
+    pdf.set_fill_color(240, 240, 240); pdf.set_font("Arial", 'B', 8)
     info_str = f"Vol: {data['volume']}L | ABV: {data['abv']}% | OG: {data['og']:.3f} | IBU: {int(data['ibu'])} | EBC: {int(data['ebc'])} | Eff: {int(data['eff']*100)}%"
-    pdf.cell(0, 10, info_str, 1, 1, 'C', fill=True); pdf.ln(8)
-    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "1. Grains & Fermentescibles", ln=True); pdf.set_font("Arial", '', 10)
-    h_line = 7; pdf.set_fill_color(245, 245, 245)
-    pdf.cell(25, h_line, "Poids", 1, 0, 'C', True); pdf.cell(140, h_line, "Malt", 1, 0, 'L', True); pdf.cell(25, h_line, "%", 1, 1, 'C', True)
+    pdf.cell(0, 6, info_str, 1, 1, 'C', fill=True); pdf.ln(4)
+    
+    # Grains
+    pdf.set_font("Arial", 'B', 10); pdf.cell(0, 6, "1. Grains & Fermentescibles", ln=True)
+    pdf.set_font("Arial", '', 9)
+    h_line = 5; pdf.set_fill_color(250, 250, 250) # Hauteur de ligne réduite à 5mm
+    
+    pdf.cell(20, h_line, "Poids", 1, 0, 'C', True); pdf.cell(145, h_line, "Malt", 1, 0, 'L', True); pdf.cell(25, h_line, "%", 1, 1, 'C', True)
     total_grain = 0
     for grain in data['grains']:
-        pdf.cell(25, h_line, f"{grain['poids']} kg", 1, 0, 'C'); nom_grain = grain['nom'].encode('latin-1', 'replace').decode('latin-1')
-        pdf.cell(140, h_line, f" {nom_grain}", 1, 0, 'L'); pdf.cell(25, h_line, f"{grain['ratio']*100:.0f} %", 1, 1, 'C'); total_grain += grain['poids']
-    pdf.set_font("Arial", 'B', 10); pdf.cell(165, h_line, f"Total : {total_grain:.2f} kg", 0, 1, 'R'); pdf.ln(8)
-    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "2. Houblonnage", ln=True); pdf.set_font("Arial", '', 10)
-    pdf.cell(25, h_line, "Poids", 1, 0, 'C', True); pdf.cell(60, h_line, "Variete", 1, 0, 'L', True); pdf.cell(60, h_line, "Usage", 1, 0, 'L', True); pdf.cell(45, h_line, "AA%", 1, 1, 'C', True)
+        pdf.cell(20, h_line, f"{grain['poids']} kg", 1, 0, 'C'); 
+        nom_grain = grain['nom'].encode('latin-1', 'replace').decode('latin-1')
+        pdf.cell(145, h_line, f" {nom_grain}", 1, 0, 'L'); 
+        pdf.cell(25, h_line, f"{grain['ratio']*100:.0f} %", 1, 1, 'C'); 
+        total_grain += grain['poids']
+    pdf.set_font("Arial", 'B', 9); pdf.cell(190, h_line, f"Total : {total_grain:.2f} kg", 0, 1, 'R'); pdf.ln(3)
+
+    # Houblons
+    pdf.set_font("Arial", 'B', 10); pdf.cell(0, 6, "2. Houblonnage", ln=True)
+    pdf.set_font("Arial", '', 9)
+    
+    pdf.cell(20, h_line, "Poids", 1, 0, 'C', True); pdf.cell(70, h_line, "Variete", 1, 0, 'L', True); pdf.cell(70, h_line, "Usage", 1, 0, 'L', True); pdf.cell(30, h_line, "AA%", 1, 1, 'C', True)
     for hop in data['houblons']:
-        pdf.cell(25, h_line, f"{hop['poids']} g", 1, 0, 'C'); pdf.cell(60, h_line, f" {hop['nom']}", 1, 0, 'L'); pdf.cell(60, h_line, f" {hop['usage']}", 1, 0, 'L'); pdf.cell(45, h_line, f"{hop['aa']} %", 1, 1, 'C')
-    pdf.ln(8)
-    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "3. Processus", ln=True); pdf.set_font("Arial", '', 10)
-    pdf.cell(95, 8, f"Empatage: {data['eau_emp']:.1f} L (67 C - 60min)", 1); pdf.cell(95, 8, f"Rincage: {data['eau_rinc']:.1f} L (75 C)", 1, 1)
-    pdf.cell(95, 8, f"Ebullition: 60 min (100 C)", 1); pdf.cell(95, 8, f"Fermentation: ~15 jours (20 C)", 1, 1); pdf.ln(8)
-    pdf.set_font("Arial", 'B', 10); pdf.cell(0, 8, f"Levure : {data['levure']}", 0, 1, 'L')
-    pdf.set_y(-15); pdf.set_font("Arial", 'I', 8); pdf.cell(0, 10, "Systeme Beer Factory", 0, 0, 'C')
+        pdf.cell(20, h_line, f"{hop['poids']} g", 1, 0, 'C'); 
+        pdf.cell(70, h_line, f" {hop['nom']}", 1, 0, 'L'); 
+        pdf.cell(70, h_line, f" {hop['usage']}", 1, 0, 'L'); 
+        pdf.cell(30, h_line, f"{hop['aa']} %", 1, 1, 'C')
+    pdf.ln(3)
+
+    # Processus
+    pdf.set_font("Arial", 'B', 10); pdf.cell(0, 6, "3. Processus", ln=True); pdf.set_font("Arial", '', 9)
+    
+    # Grille 2x2 pour le process (gain de place)
+    pdf.cell(95, 6, f"Empatage: {data['eau_emp']:.1f} L (67 C - 60min)", 1); pdf.cell(95, 6, f"Rincage: {data['eau_rinc']:.1f} L (75 C)", 1, 1)
+    pdf.cell(95, 6, f"Ebullition: 60 min (100 C)", 1); pdf.cell(95, 6, f"Fermentation: ~15 jours (20 C)", 1, 1); pdf.ln(3)
+    
+    pdf.set_font("Arial", 'B', 9); pdf.cell(0, 6, f"Levure : {data['levure']}", 0, 1, 'L')
+    
+    pdf.set_y(-12); pdf.set_font("Arial", 'I', 7); pdf.cell(0, 10, "Systeme Beer Factory", 0, 0, 'C')
     return pdf.output(dest='S').encode('latin-1')
 
 # ==========================================
 # HEADER
 # ==========================================
 
-st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
+# Utilisation du CSS pour le centrage, plus de style inline
+st.markdown('<h1>BEER FACTORY</h1>', unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns([2, 0.8, 2]) 
 with c2:
@@ -285,7 +319,7 @@ with st.container(border=True):
             "Saison": "🚜 Rustique, sèche et poivrée.",
             "Lager": "❄️ Fermentation basse, nette."
         }
-        style = st.selectbox("Style ▾", list(definitions_styles.keys()))
+        style = st.selectbox("Style", list(definitions_styles.keys()))
         st.caption(definitions_styles[style])
         
         c_v, c_a = st.columns(2)
