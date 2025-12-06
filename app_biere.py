@@ -30,12 +30,23 @@ MALTS_DB = {
     "Chocolat": {"yield": 65, "ebc": 900}, "Orge Grillé": {"yield": 65, "ebc": 1200},
     "Fumé": {"yield": 77, "ebc": 6}, "Biscuit": {"yield": 75, "ebc": 50}
 }
+
+# AJOUT DES DESCRIPTIONS DANS LA DB HOUBLONS
 HOPS_DB = {
-    "Magnum": {"aa": 12.0}, "Saaz": {"aa": 3.5}, "Citra": {"aa": 13.0},
-    "Amarillo": {"aa": 9.0}, "Mosaic": {"aa": 12.0}, "Galaxy": {"aa": 14.0},
-    "Simcoe": {"aa": 13.0}, "Chinook": {"aa": 13.0}, "Mistral": {"aa": 6.5},
-    "Hallertau Mittelfrüh": {"aa": 4.0}, "Barbe Rouge": {"aa": 8.0},
-    "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
+    "Magnum": {"aa": 12.0, "desc": "Amérisant neutre et très propre."},
+    "Saaz": {"aa": 3.5, "desc": "Noble, notes herbacées et épicées douces."},
+    "Citra": {"aa": 13.0, "desc": "Explosion d'agrumes (citron vert, pamplemousse) et fruits tropicaux."},
+    "Amarillo": {"aa": 9.0, "desc": "Orange distincte et notes florales."},
+    "Mosaic": {"aa": 12.0, "desc": "Complexe : myrtille, mandarine, papaye et terreux."},
+    "Galaxy": {"aa": 14.0, "desc": "Passion intense, pêche et agrumes."},
+    "Simcoe": {"aa": 13.0, "desc": "Résineux (Pin), fruit de la passion et abricot."},
+    "Chinook": {"aa": 13.0, "desc": "Pin intense, épicé et pamplemousse."},
+    "Mistral": {"aa": 6.5, "desc": "Douceur florale (rose), melon et litchi."},
+    "Hallertau Mittelfrüh": {"aa": 4.0, "desc": "Noble allemand, floral et légèrement épicé."},
+    "Barbe Rouge": {"aa": 8.0, "desc": "Fruits rouges (fraise, cassis, framboise)."},
+    "Fuggles": {"aa": 4.5, "desc": "Terreux, boisé, classique anglais."},
+    "Cascade": {"aa": 6.0, "desc": "Floral, épicé avec des notes de pamplemousse."},
+    "Tettnanger": {"aa": 4.0, "desc": "Herbacé, floral et légèrement poivré."}
 }
 
 # --- STYLE CSS ---
@@ -108,7 +119,7 @@ st.markdown("""
         font-size: 1.3rem; padding: 0.8rem 1.5rem;
     }
     
-    /* Bouton Secondaire (Arômes non sélectionnés) */
+    /* Bouton Secondaire (Arômes) */
     div.stButton > button[kind="secondary"] {
         background-color: #ffffff; color: var(--dark-brown) !important;
         font-size: 1.5rem; /* Gros Emoji */
@@ -166,6 +177,16 @@ st.markdown("""
     }
     .process-detail {
         font-family: 'Roboto', sans-serif; color: #555; font-size: 0.9rem; margin-top: 5px; font-weight: 500;
+    }
+    
+    /* DESCRIPTION HOUBLONS */
+    .hop-desc {
+        color: #666;
+        font-style: italic;
+        font-size: 0.9rem;
+        margin-left: 20px;
+        margin-bottom: 8px;
+        margin-top: -2px;
     }
     
     .block-container { padding-top: 1rem; padding-bottom: 5rem; }
@@ -265,7 +286,6 @@ with st.container(border=True):
         volume = c_v.slider("Volume (L)", 10, 100, 20, 10)
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
         
-        # PLUS D'ESPACE VIDE ICI POUR GARDER L'ALIGNEMENT
         amertume = st.select_slider("Amertume Ciblée", options=["Légère", "Moyenne", "Forte", "Extrême"])
         ibu_map = {"Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
@@ -382,8 +402,16 @@ if st.session_state.recette_generee:
 
             st.write("")
             st.markdown('<p class="subheader-text">🌿 HOUBLONS</p>', unsafe_allow_html=True)
+            
+            # --- AFFICHAGE HOUBLONS AVEC DESCRIPTIONS ---
+            desc_amer = HOPS_DB.get(houblon_amer, {}).get("desc", "")
             st.write(f"• **{int(grammes_amer)}g** {houblon_amer} (Amérisant - 60min)")
+            st.markdown(f"<p class='hop-desc'>↳ {desc_amer}</p>", unsafe_allow_html=True)
+            
+            desc_arome = HOPS_DB.get(houblon_arome, {}).get("desc", "")
             st.write(f"• **{int(grammes_arome)}g** {houblon_arome} (Aromatique - 5min)")
+            st.markdown(f"<p class='hop-desc'>↳ {desc_arome}</p>", unsafe_allow_html=True)
+            
             st.caption(f"IBU Cible : {int(ibu_target)}")
         
         with col_res2:
