@@ -6,12 +6,20 @@ import math
 # --- CONFIGURATION INITIALE ---
 st.set_page_config(page_title="Beer Factory", page_icon="🍺", layout="wide")
 
-# --- MAPPING EMOJI -> NOM (Pour la logique) ---
-AROMA_MAP = {
-    "🍊": "Agrumes", "🥭": "Tropical", "🌲": "Pin", "🍌": "Banane", 
-    "☕": "Café", "🍫": "Chocolat", "🍮": "Caramel", "🍪": "Biscuit", 
-    "🥓": "Fumé", "🌶️": "Épices", "🌸": "Floral"
-}
+# --- GESTION ÉTAT (SESSION STATE) ---
+if 'selected_aromas' not in st.session_state:
+    st.session_state.selected_aromas = []
+if 'recette_generee' not in st.session_state:
+    st.session_state.recette_generee = False
+
+# --- MAPPING EMOJI -> NOM ---
+AROMA_DATA = [
+    ("🍊", "Agrumes"), ("🥭", "Tropical"), ("🌲", "Pin"), ("🍌", "Banane"), 
+    ("☕", "Café"), ("🍫", "Chocolat"), ("🍮", "Caramel"), ("🍪", "Biscuit"), 
+    ("🥓", "Fumé"), ("🌶️", "Épices"), ("🌸", "Floral")
+]
+# Dictionnaire inverse pour les calculs
+AROMA_DICT = {emoji: name for emoji, name in AROMA_DATA}
 
 # --- MOTEUR DE CALCULS ---
 MALTS_DB = {
@@ -44,7 +52,7 @@ st.markdown("""
         --text-dark: #1a120b;
     }
 
-    /* 1. FOND ET CADRE PRINCIPAL MASSIF */
+    /* FOND ET CADRE */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
@@ -54,11 +62,9 @@ st.markdown("""
         padding: 20px;
     }
     
-    @media (max-width: 640px) {
-        .stApp { border: 15px solid var(--dark-brown); padding: 5px; }
-    }
+    @media (max-width: 640px) { .stApp { border: 15px solid var(--dark-brown); padding: 5px; } }
 
-    /* 2. MODULES INTERNES */
+    /* MODULES */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
         border: 6px solid var(--dark-brown) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
@@ -68,27 +74,19 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* TITRES */
+    /* TYPOGRAPHIE */
     h1 {
-        font-family: 'Rye', serif !important;
-        color: var(--dark-brown) !important; 
-        text-transform: uppercase; 
-        font-weight: 400;
-        letter-spacing: 1px;
-        text-align: center !important;
-        font-size: 3rem !important; 
-        line-height: 1.1;
+        font-family: 'Rye', serif !important; color: var(--dark-brown) !important; 
+        text-transform: uppercase; font-weight: 400; letter-spacing: 1px;
+        text-align: center !important; font-size: 3rem !important; line-height: 1.1;
         margin-bottom: -10px !important;
     }
     
     h2, h3 { 
-        font-family: 'Rye', serif !important;
-        color: var(--dark-brown) !important; 
-        text-transform: uppercase; 
-        letter-spacing: 1px;
+        font-family: 'Rye', serif !important; color: var(--dark-brown) !important; 
+        text-transform: uppercase; letter-spacing: 1px;
     }
     
-    /* SOUS-TITRES */
     .subheader-text {
         color: var(--primary-amber); font-weight: bold; font-size: 1.2em;
         margin-bottom: 15px; border-bottom: 3px solid var(--primary-amber);
@@ -96,68 +94,56 @@ st.markdown("""
         font-family: 'Rye', serif;
     }
 
-    /* BOUTONS GENERAUX (Générer, Download) */
+    /* BOUTONS GENERAUX (Générer/Télécharger) */
     div.stButton > button {
-        background-color: var(--primary-amber); color: white !important;
-        border: 3px solid var(--dark-brown);
-        border-radius: 4px; padding: 0.5rem 1rem;
+        border: 3px solid var(--dark-brown); border-radius: 4px; 
         font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
-        box-shadow: 4px 4px 0px var(--dark-brown);
-        font-size: 1.5rem; /* Icone plus grosse */
-        transition: all 0.2s;
+        box-shadow: 4px 4px 0px var(--dark-brown); transition: all 0.1s;
         width: 100%;
     }
+    /* Bouton Principal (Ambre) */
+    div.stButton > button[kind="primary"] {
+        background-color: var(--primary-amber); color: white !important;
+    }
+    /* Bouton Secondaire (Blanc - Pour les arômes non sélectionnés) */
+    div.stButton > button[kind="secondary"] {
+        background-color: #ffffff; color: var(--dark-brown) !important;
+        font-size: 1.5rem; /* Gros Emoji */
+        padding: 0.2rem 0rem;
+    }
     div.stButton > button:hover {
-        transform: translate(2px, 2px);
+        transform: translate(1px, 1px);
         box-shadow: 2px 2px 0px var(--dark-brown);
-        background-color: #d35400;
     }
 
     /* INPUTS */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div,
     div[data-baseweb="base-input"] {
-        background-color: #ffffff !important;
-        color: var(--dark-brown) !important;
-        border: 2px solid #bcaaa4;
-        border-radius: 4px;
+        background-color: #ffffff !important; color: var(--dark-brown) !important;
+        border: 2px solid #bcaaa4; border-radius: 4px;
     }
     input[type="number"] { color: var(--dark-brown) !important; font-weight: bold; }
     
     .stSelectbox label, .stNumberInput label, .stSlider label {
-        color: var(--dark-brown) !important; 
-        font-weight: bold;
-        font-family: 'Roboto', sans-serif;
-        text-transform: uppercase;
+        color: var(--dark-brown) !important; font-weight: bold;
+        font-family: 'Roboto', sans-serif; text-transform: uppercase;
     }
 
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- STYLE DES PILLS (AROMES) --- */
-    /* On cible le bouton interne pour virer le texte si besoin, mais ici on n'a que des emojis */
-    [data-testid="stPills"] button {
-        background-color: #ffffff !important; 
-        border: 2px solid var(--dark-brown) !important;
-        padding: 5px 15px !important;
-    }
-    /* Taille de l'emoji */
-    [data-testid="stPills"] button p {
-        font-size: 1.8rem !important; /* GROS EMOJI */
-        margin: 0px !important;
+    /* LABEL ETIQUETTE BOUTON */
+    .btn-label {
+        text-align: center; font-family: 'Roboto', sans-serif;
+        color: var(--dark-brown); font-weight: 900; font-size: 0.8rem;
+        text-transform: uppercase; margin-bottom: 2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     
-    /* Sélectionné */
-    [data-testid="stPills"] button[aria-selected="true"] {
-        background-color: var(--primary-amber) !important; 
-        border-color: var(--dark-brown) !important;
-        box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    }
-    
-    /* --- CARTES PROCESSUS --- */
+    /* CARTES PROCESSUS */
     .process-card {
-        background-color: #ffffff;
-        border: 4px solid var(--dark-brown);
+        background-color: #ffffff; border: 4px solid var(--dark-brown);
         box-shadow: inset 0 0 0 1px var(--primary-amber);
         padding: 15px; margin-bottom: 10px; border-radius: 4px;
         text-align: center; height: 100%; color: var(--text-dark);
@@ -173,22 +159,9 @@ st.markdown("""
         font-family: 'Roboto', sans-serif; color: #555; font-size: 0.9rem; margin-top: 5px; font-weight: 500;
     }
     
-    /* TEXTE AU DESSUS DES BOUTONS ICONES */
-    .btn-label {
-        text-align: center;
-        font-family: 'Rye', serif;
-        color: var(--dark-brown);
-        text-transform: uppercase;
-        font-size: 1.1rem;
-        margin-bottom: 5px;
-    }
-    
     .block-container { padding-top: 1rem; padding-bottom: 5rem; }
     </style>
 """, unsafe_allow_html=True)
-
-if 'recette_generee' not in st.session_state:
-    st.session_state.recette_generee = False
 
 # --- FONCTIONS MATHÉMATIQUES ---
 def round_grain(poids): return round(poids * 20) / 20
@@ -218,8 +191,8 @@ def create_pdf_compact(data):
     pdf = PDF(); pdf.add_page(); pdf.set_auto_page_break(auto=True, margin=10)
     pdf.set_font("Arial", 'B', 14); pdf.cell(0, 8, f"Fiche de Production : {data['style'].upper()}", ln=True, align='C')
     pdf.set_font("Arial", 'I', 11)
-    # Conversion des emojis en noms pour le PDF (car FPDF ne supporte pas les emojis)
-    aromes_noms = [AROMA_MAP.get(e, "") for e in data['aromes']]
+    # Conversion Emoji vers Texte pour PDF
+    aromes_noms = [AROMA_DICT.get(e, "") for e in data['aromes']]
     aromes_txt = ", ".join(aromes_noms).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 6, f"Profil : {aromes_txt}", ln=True, align='C'); pdf.ln(5)
     pdf.set_fill_color(230, 230, 230); pdf.set_font("Arial", 'B', 10)
@@ -291,20 +264,35 @@ with st.container(border=True):
         ibu_target = ibu_map[amertume]
 
     with col2:
-        st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES</p>', unsafe_allow_html=True)
+        st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES (MAX 2)</p>', unsafe_allow_html=True)
         
-        # UNIQUEMENT LES EMOJIS (Clés du dictionnaire AROMA_MAP)
-        emojis_seuls = list(AROMA_MAP.keys())
+        # LOGIQUE DE GRILLE POUR LES BOUTONS
+        # On découpe la liste AROMA_DATA en chunks de 4 par ligne
+        cols_per_row = 4
+        rows = [AROMA_DATA[i:i + cols_per_row] for i in range(0, len(AROMA_DATA), cols_per_row)]
         
-        selected_emojis = st.pills(
-            "Sélectionnez 2 arômes max :",
-            emojis_seuls,
-            selection_mode="multi"
-        )
-        
-        trop_d_aromes = len(selected_emojis) > 2
-        if trop_d_aromes:
-            st.error("⚠️ Trop d'arômes ! Gardez-en 2 maximum.")
+        for row in rows:
+            cols = st.columns(cols_per_row)
+            for i, (emoji, name) in enumerate(row):
+                with cols[i]:
+                    # Étiquette
+                    st.markdown(f'<div class="btn-label">{name}</div>', unsafe_allow_html=True)
+                    
+                    # État du bouton
+                    is_selected = emoji in st.session_state.selected_aromas
+                    btn_type = "primary" if is_selected else "secondary"
+                    
+                    # Bouton
+                    if st.button(emoji, key=f"btn_{emoji}", type=btn_type, use_container_width=True):
+                        if is_selected:
+                            st.session_state.selected_aromas.remove(emoji)
+                            st.rerun()
+                        else:
+                            if len(st.session_state.selected_aromas) < 2:
+                                st.session_state.selected_aromas.append(emoji)
+                                st.rerun()
+                            else:
+                                st.toast("⚠️ Maximum 2 arômes ! Désélectionnez-en un d'abord.", icon="🚫")
 
 # ==========================================
 # TRANSITION
@@ -317,10 +305,10 @@ except:
 
 st.write("")
 
-c_b1, c_b2, c_b3 = st.columns([1, 1, 1]) # Colonnes ajustées pour centrer
+c_b1, c_b2, c_b3 = st.columns([1, 1, 1])
 with c_b2:
     st.markdown('<div class="btn-label">GÉNÉRER MA RECETTE</div>', unsafe_allow_html=True)
-    if st.button("🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
+    if st.button("🍺", type="primary", use_container_width=True):
         st.session_state.recette_generee = True
 
 st.write("")
@@ -340,8 +328,8 @@ if st.session_state.recette_generee:
     elif style == "Saison": malt_base_nom="Pilsner"; malt_spe_nom="Munich"; levure="Belle Saison"
     elif style == "Lager": malt_base_nom="Pilsner"; malt_spe_nom="Vienna"; levure="W-34/70"
     
-    # TRADUCTION EMOJI -> NOM POUR LA LOGIQUE
-    aromes_clean = [AROMA_MAP[e] for e in selected_emojis]
+    # Traduction Emoji -> Nom pour la logique
+    aromes_clean = [AROMA_DICT[e] for e in st.session_state.selected_aromas]
     
     if "Biscuit" in aromes_clean: malt_spe_nom = "Biscuit"
     if "Fumé" in aromes_clean: malt_base_nom = "Fumé"
@@ -368,7 +356,7 @@ if st.session_state.recette_generee:
     if eau_rincage < 0: eau_rincage = 0
     
     recette_data = {
-        "style": style, "aromes": selected_emojis, "volume": volume, "abv": degre_vise, # On passe les emojis au PDF pour qu'il les traduise
+        "style": style, "aromes": st.session_state.selected_aromas, "volume": volume, "abv": degre_vise,
         "og": target_og, "ibu": ibu_target, "ebc": ebc_estime, "eff": efficacite,
         "grains": [{"nom": malt_base_nom, "poids": poids_base, "ratio": ratio_base}, {"nom": malt_spe_nom, "poids": poids_spe, "ratio": ratio_spe}],
         "houblons": [{"nom": houblon_amer, "poids": int(grammes_amer), "usage": "Ebu 60min", "aa": aa_amer}, {"nom": houblon_arome, "poids": int(grammes_arome), "usage": "Arome 5min", "aa": aa_arome}],
@@ -443,7 +431,6 @@ if st.session_state.recette_generee:
         st.divider()
         pdf_bytes = create_pdf_compact(recette_data)
         
-        # BOUTON DOWNLOAD AVEC ETIQUETTE SEPAREE
         col_dl1, col_dl2, col_dl3 = st.columns([1, 1, 1])
         with col_dl2:
             st.markdown('<div class="btn-label">TÉLÉCHARGER MA FICHE</div>', unsafe_allow_html=True)
