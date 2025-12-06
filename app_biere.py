@@ -6,7 +6,7 @@ import math
 # --- CONFIGURATION INITIALE ---
 st.set_page_config(page_title="Beer Factory", page_icon="🍺", layout="wide")
 
-# --- MOTEUR DE CALCULS (INCHANGÉ) ---
+# --- MOTEUR DE CALCULS ---
 MALTS_DB = {
     "Pilsner": {"yield": 78, "ebc": 3.5}, "Pale Ale": {"yield": 79, "ebc": 6.5},
     "Maris Otter": {"yield": 78, "ebc": 5.0}, "Munich": {"yield": 76, "ebc": 15},
@@ -24,25 +24,39 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- NOUVEAU STYLE CSS : LISIBILITÉ & COULEURS AMBRÉES ---
+# --- STYLE CSS AVEC CADRE ARTISTIQUE ---
 st.markdown("""
     <style>
-    /* --- PALETTE DE COULEURS --- */
     :root {
-        --primary-amber: #C27818; /* Ambre profond pour les accents */
-        --dark-slate: #2C3E50;    /* Gris foncé industriel pour le texte */
-        --bg-cream: #FDFBF7;      /* Fond crème léger pour la lisibilité */
-        --text-dark: #222222;     /* Noir doux pour le texte courant */
+        --primary-amber: #C27818;
+        --dark-slate: #2C3E50;
+        --bg-cream: #FDFBF7;
+        --text-dark: #222222;
     }
 
-    /* FOND GÉNÉRAL */
+    /* --- CADRE ARTISTIQUE AUTOUR DE L'APPLI --- */
     .stApp {
         background-color: var(--bg-cream);
         color: var(--text-dark);
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; /* Police standard très lisible */
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        
+        /* Le Cadre "Double Border" */
+        border: 15px solid var(--dark-slate); /* Bordure extérieure industrielle */
+        box-shadow: inset 0 0 0 4px var(--primary-amber); /* Liseré intérieur Ambre */
+        margin: 10px; /* Petit espace avec le bord du navigateur */
+        border-radius: 8px; /* Coins légèrement adoucis */
     }
 
-    /* TITRES */
+    /* Ajustement mobile pour ne pas perdre trop de place */
+    @media (max-width: 640px) {
+        .stApp {
+            border: 5px solid var(--dark-slate);
+            box-shadow: inset 0 0 0 2px var(--primary-amber);
+            margin: 0px;
+        }
+    }
+
+    /* --- RESTE DU DESIGN --- */
     h1, h2, h3 {
         color: var(--dark-slate) !important;
         text-transform: uppercase;
@@ -50,15 +64,15 @@ st.markdown("""
         font-weight: 700;
     }
     
-    /* SOUS-TITRES DANS L'APP */
     .subheader-text {
         color: var(--primary-amber);
         font-weight: bold;
         font-size: 1.1em;
         margin-bottom: 10px;
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
     }
 
-    /* BOUTONS (Ambre sur fond foncé, texte blanc) */
     div.stButton > button {
         background-color: var(--primary-amber);
         color: white !important;
@@ -69,16 +83,12 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 1px;
         transition: background-color 0.3s;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
     }
     div.stButton > button:hover {
-        background-color: var(--dark-slate); /* Devient gris foncé au survol */
-    }
-    div.stButton > button:disabled {
-        background-color: #cccccc;
-        color: #666666 !important;
+        background-color: var(--dark-slate);
     }
 
-    /* INPUTS & SLIDERS (Force le fond blanc et texte noir pour éviter le bug blanc sur blanc) */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div {
         background-color: white !important;
@@ -87,39 +97,28 @@ st.markdown("""
         border-radius: 4px;
     }
     
-    /* Labels des inputs */
     .stSelectbox label, .stNumberInput label, .stSlider label, .stPills label {
         color: var(--dark-slate) !important;
         font-weight: 600;
     }
 
-    /* Curseur des sliders en ambre */
-    div[data-baseweb="slider"] div[role="slider"] {
-        background-color: var(--primary-amber) !important;
-    }
-    div[data-baseweb="slider"] > div > div > div {
-        background-color: var(--primary-amber) !important; /* La barre remplie */
-    }
+    div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
+    div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* PILLS (Tags arômes) */
     span[data-baseweb="tag"] {
-        background-color: #F0E4D3 !important; /* Ambre très clair */
+        background-color: #F0E4D3 !important;
         border: 1px solid var(--primary-amber) !important;
         color: var(--dark-slate) !important;
     }
     
-    /* CONTAINERS (Bordures plus nettes) */
-    div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        border: 1px solid #e0e0e0;
-        box-shadow: none; /* Plus plat, plus industriel */
-    }
-    
-    /* METRICS */
-    div[data-testid="stMetricLabel"] { color: var(--dark-slate); }
+    div[data-testid="stMetricLabel"] { color: var(--dark-slate); font-size: 0.9em; }
     div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 700; }
-
-    hr { margin: 2rem 0; border-color: #eeeeee; }
-
+    
+    /* Suppression du padding haut excessif de Streamlit */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 5rem;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -142,7 +141,7 @@ def estimate_color(malt_list, volume):
     mcu = sum([(w * props['ebc']) / volume for w, props in malt_list])
     return 2.93 * (mcu * 4.23) ** 0.6859
 
-# --- PDF GENERATOR (Compact & Clean) ---
+# --- PDF GENERATOR ---
 class PDF(FPDF):
     def header(self):
         if os.path.exists("logo.png"): self.image("logo.png", 10, 8, 25)
@@ -213,7 +212,7 @@ st.markdown('<p style="text-align: center; color: #7f8c8d; margin-top: -15px; fo
 st.write("")
 
 # ==========================================
-# PARTIE 1 : CONFIGURATION
+# CONFIGURATION
 # ==========================================
 
 with st.container(border=True):
@@ -257,16 +256,14 @@ with c_b2:
         st.session_state.recette_generee = True
 
 # ==========================================
-# PARTIE 2 : RÉSULTATS
+# RÉSULTATS
 # ==========================================
 
 if st.session_state.recette_generee:
     st.divider()
     
-    # 0. CONSTANTES
     efficacite = 0.75 
 
-    # 1. LOGIQUE METIER
     malt_base_nom = "Pilsner"; malt_spe_nom = "Blé (Froment)"; levure = "US-05 (Neutre)"
     houblon_amer = "Magnum"; houblon_arome = "Saaz"
     ratio_base = 0.90; ratio_spe = 0.10
@@ -290,7 +287,6 @@ if st.session_state.recette_generee:
     elif "Fruits Rouges" in aromes_clean: houblon_arome = "Barbe Rouge"
     elif "Café" in aromes_clean: houblon_arome = "Fuggles"
 
-    # 2. CALCULS
     target_og = calc_og_from_abv(degre_vise)
     avg_yield = (MALTS_DB.get(malt_base_nom, {"yield":78})['yield'] * ratio_base) + (MALTS_DB.get(malt_spe_nom, {"yield":75})['yield'] * ratio_spe)
     total_grain_mass = calc_grain_weight(target_og, volume, efficacite, avg_yield)
@@ -304,7 +300,6 @@ if st.session_state.recette_generee:
     eau_empatage = total_grain_affiche * 3.0; eau_rincage = (volume * 1.15 + total_grain_affiche) - eau_empatage
     if eau_rincage < 0: eau_rincage = 0
 
-    # 3. AFFICHAGE
     st.markdown(f"<h2 style='text-align: center;'>FICHE DE PRODUCTION : {style.upper()}</h2>", unsafe_allow_html=True)
     if aromes_clean: st.caption(f"<p style='text-align: center;'>Notes : {', '.join(aromes_clean)}</p>", unsafe_allow_html=True)
     st.write("")
