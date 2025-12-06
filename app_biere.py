@@ -134,10 +134,9 @@ st.markdown("""
         font-family: 'Roboto', sans-serif; text-transform: uppercase;
     }
     
-    /* --- FORCE LA FLÈCHE DU SELECTBOX EN MARRON --- */
+    /* FORCE LA FLÈCHE DU SELECTBOX EN MARRON */
     div[data-baseweb="select"] svg {
-        fill: var(--dark-brown) !important;
-        stroke: var(--dark-brown) !important;
+        fill: var(--dark-brown) !important; stroke: var(--dark-brown) !important;
     }
 
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
@@ -259,7 +258,6 @@ with st.container(border=True):
             "Saison": "🚜 Rustique, sèche et poivrée.",
             "Lager": "❄️ Fermentation basse, nette."
         }
-        # AJOUT DE LA FLÈCHE DANS LE LABEL
         style = st.selectbox("Style ▾", list(definitions_styles.keys()))
         st.caption(definitions_styles[style])
         
@@ -267,8 +265,7 @@ with st.container(border=True):
         volume = c_v.slider("Volume (L)", 10, 100, 20, 10)
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
         
-        st.write("")
-        st.write("")
+        # PLUS D'ESPACE VIDE ICI POUR GARDER L'ALIGNEMENT
         amertume = st.select_slider("Amertume Ciblée", options=["Légère", "Moyenne", "Forte", "Extrême"])
         ibu_map = {"Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
