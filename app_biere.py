@@ -2,444 +2,224 @@ import streamlit as st
 import pandas as pd
 from fpdf import FPDF
 import os
+import math
 
 # --- CONFIGURATION INITIALE ---
-st.set_page_config(page_title="Beer Master", page_icon="🍺", layout="wide")
+st.set_page_config(page_title="Beer Factory", page_icon="🏭", layout="wide")
+
+# --- DATA: BASE DE DONNÉES INGRÉDIENTS ---
+MALTS_DB = {
+    "Pilsner": {"yield": 78, "ebc": 3.5},
+    "Pale Ale": {"yield": 79, "ebc": 6.5},
+    "Maris Otter": {"yield": 78, "ebc": 5.0},
+    "Munich": {"yield": 76, "ebc": 15},
+    "Vienna": {"yield": 76, "ebc": 8},
+    "Blé (Froment)": {"yield": 80, "ebc": 4},
+    "Carapils": {"yield": 72, "ebc": 3},
+    "Crystal 150": {"yield": 70, "ebc": 150},
+    "Chocolat": {"yield": 65, "ebc": 900},
+    "Orge Grillé": {"yield": 65, "ebc": 1200},
+    "Acide": {"yield": 50, "ebc": 4},
+    "Fumé": {"yield": 77, "ebc": 6},
+    "Biscuit": {"yield": 75, "ebc": 50}
+}
+
+HOPS_DB = {
+    "Magnum": {"aa": 12.0},
+    "Saaz": {"aa": 3.5},
+    "Citra": {"aa": 13.0},
+    "Amarillo": {"aa": 9.0},
+    "Mosaic": {"aa": 12.0},
+    "Galaxy": {"aa": 14.0},
+    "Simcoe": {"aa": 13.0},
+    "Chinook": {"aa": 13.0},
+    "Mistral": {"aa": 6.5},
+    "Hallertau": {"aa": 4.0},
+    "Barbe Rouge": {"aa": 8.0},
+    "Fuggles": {"aa": 4.5},
+    "Cascade": {"aa": 6.0}
+}
 
 # --- STYLE CSS ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rye&family=Poppins:wght@300;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Roboto:wght@300;400&display=swap');
     
-    .main-title {
-        font-family: 'Rye', serif;
-        font-size: 4em;
-        text-align: center;
-        color: #e67e22; 
-        margin-bottom: 0px;
-        text-shadow: 2px 2px 0px #000;
-    }
+    .main-title { font-family: 'Oswald', sans-serif; font-size: 4em; text-align: center; color: #2c3e50; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0px; }
+    .sub-title { font-family: 'Roboto', sans-serif; font-size: 1.2em; text-align: center; color: #7f8c8d; letter-spacing: 1px; margin-bottom: 30px; }
     
-    .sub-title {
-        font-family: 'Poppins', sans-serif;
-        font-size: 2.5em;
-        text-align: center;
-        color: #555;
-        font-weight: bold;
-        font-style: italic;
-        margin-top: -10px;
-        margin-bottom: 40px;
-    }
-
-    h1, h2, h3 {
-        font-family: 'Rye', serif !important;
-        color: #2c3e50;
-    }
-
-    div.stButton > button {
-        background-color: #e67e22;
-        color: white !important;
-        border-radius: 10px;
-        font-family: 'Rye', serif;
-        font-size: 1.4rem;
+    h1, h2, h3 { font-family: 'Oswald', sans-serif !important; color: #34495e; }
+    
+    div.stButton > button { 
+        background-color: #2c3e50; 
+        color: white !important; 
+        font-family: 'Oswald', sans-serif; 
+        font-size: 1.2rem; 
+        border-radius: 4px; 
+        text-transform: uppercase;
         border: none;
-        padding: 0.6rem 1rem;
-        letter-spacing: 1px;
     }
     div.stButton > button:hover {
-        background-color: #d35400;
-        border: 2px solid #e67e22;
-        color: #fff !important;
+        background-color: #34495e;
     }
-    
-    .stSelectbox label, .stNumberInput label, .stSlider label {
-        font-family: 'Rye', serif;
-        font-size: 1.1em;
-        color: #444;
-    }
-    
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
-# --- GESTION DE L'ÉTAT ---
 if 'recette_generee' not in st.session_state:
     st.session_state.recette_generee = False
 
-# --- FONCTION D'ARRONDI (Spécial 0.05kg) ---
-def round_grain(poids):
-    # On multiplie par 20, on arrondit à l'entier, on divise par 20
-    return round(poids * 20) / 20
+# --- FONCTIONS PHYSIQUE ---
+def round_grain(poids): return round(poids * 20) / 20
+def calc_og_from_abv(abv): return (abv / 131.25) + 1.010
 
-# --- CHARGEMENT DATA ---
+def calc_grain_weight(target_sg, volume, efficiency=0.75, malt_yield=78):
+    points = (target_sg - 1) * 1000
+    return (points * volume) / (malt_yield * efficiency * 3.83)
+
+def calc_hops_weight(target_ibu, alpha_acid, time_min, volume_l, boil_gravity):
+    bigness = 1.65 * (0.000125 ** (boil_gravity - 1))
+    boil_fact = (1 - (math.e ** (-0.04 * time_min))) / 4.15
+    utilization = bigness * boil_fact
+    if utilization == 0: return 0
+    return (target_ibu * volume_l) / (utilization * (alpha_acid/100) * 1000)
+
+def estimate_color(malt_list, volume):
+    mcu = sum([(w * props['ebc']) / volume for w, props in malt_list])
+    return 2.93 * (mcu * 4.23) ** 0.6859
+
+# --- GÉNÉRATION PDF COMPACTE (1 PAGE) ---
+class PDF(FPDF):
+    def header(self):
+        # Logo plus discret
+        if os.path.exists("logo.png"):
+            self.image("logo.png", 10, 8, 20)
+        self.set_font('Arial', 'B', 24)
+        self.cell(0, 10, 'BEER FACTORY', 0, 1, 'C')
+        self.ln(2) # Espace réduit
+
+def create_pdf_compact(data):
+    pdf = PDF()
+    pdf.add_page()
+    # Marge basse réduite pour éviter le saut de page
+    pdf.set_auto_page_break(auto=True, margin=10) 
+    
+    # Sous-titre
+    pdf.set_font("Arial", 'B', 14)
+    pdf.cell(0, 8, f"Fiche : {data['style']}", ln=True, align='C')
+    pdf.set_font("Arial", 'I', 10)
+    
+    aromes_txt = ", ".join(data['aromes']).encode('latin-1', 'replace').decode('latin-1')
+    pdf.cell(0, 5, f"Profil : {aromes_txt}", ln=True, align='C')
+    pdf.ln(5)
+
+    # BANDEAU TECHNIQUE (Compact)
+    pdf.set_fill_color(240, 240, 240)
+    pdf.set_font("Arial", 'B', 9)
+    info_str = f"VOL: {data['volume']}L  |  ABV: {data['abv']}%  |  OG: {data['og']:.3f}  |  IBU: {int(data['ibu'])}  |  EBC: {int(data['ebc'])}"
+    pdf.cell(0, 8, info_str, 1, 1, 'C', fill=True)
+    pdf.ln(5)
+
+    # 1. GRAINS
+    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "1. Grains", ln=True)
+    pdf.set_font("Arial", '', 10)
+    
+    # Hauteur de ligne réduite à 6mm
+    h_line = 6
+    pdf.set_fill_color(250, 250, 250)
+    pdf.cell(25, h_line, "Poids", 1, 0, 'C', True)
+    pdf.cell(140, h_line, "Malt", 1, 0, 'L', True)
+    pdf.cell(25, h_line, "%", 1, 1, 'C', True)
+    
+    total_grain = 0
+    for grain in data['grains']:
+        pdf.cell(25, h_line, f"{grain['poids']} kg", 1, 0, 'C')
+        nom_grain = grain['nom'].encode('latin-1', 'replace').decode('latin-1')
+        pdf.cell(140, h_line, f" {nom_grain}", 1, 0, 'L')
+        pdf.cell(25, h_line, f"{grain['ratio']*100:.0f} %", 1, 1, 'C')
+        total_grain += grain['poids']
+    
+    pdf.set_font("Arial", 'B', 10)
+    pdf.cell(165, h_line, f"Total : {total_grain:.2f} kg", 0, 1, 'R')
+    pdf.ln(3)
+
+    # 2. HOUBLONS
+    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "2. Houblons", ln=True)
+    pdf.set_font("Arial", '', 10)
+    
+    pdf.cell(25, h_line, "Poids", 1, 0, 'C', True)
+    pdf.cell(60, h_line, "Variete", 1, 0, 'L', True)
+    pdf.cell(60, h_line, "Usage", 1, 0, 'L', True)
+    pdf.cell(45, h_line, "Acide Alpha", 1, 1, 'C', True)
+    
+    for hop in data['houblons']:
+        pdf.cell(25, h_line, f"{hop['poids']} g", 1, 0, 'C')
+        pdf.cell(60, h_line, f" {hop['nom']}", 1, 0, 'L')
+        pdf.cell(60, h_line, f" {hop['usage']}", 1, 0, 'L')
+        pdf.cell(45, h_line, f"{hop['aa']} %", 1, 1, 'C')
+    pdf.ln(5)
+
+    # 3. PROCESS (Sur une ligne ou deux compactes)
+    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "3. Processus", ln=True)
+    pdf.set_font("Arial", '', 10)
+    
+    # Utilisation de multicell ou cell cote a cote
+    pdf.cell(95, 8, f"Empatage: {data['eau_emp']:.1f} L (67 C - 60min)", 1)
+    pdf.cell(95, 8, f"Rincage: {data['eau_rinc']:.1f} L (75 C)", 1, 1)
+    pdf.cell(95, 8, f"Ebullition: 60 min", 1)
+    pdf.cell(95, 8, f"Fermentation: 20 C (~15 jours)", 1, 1)
+    pdf.ln(5)
+
+    # Info Levure
+    pdf.set_font("Arial", 'B', 10)
+    pdf.cell(0, 8, f"Levure Recommandee : {data['levure']}", 0, 1, 'L')
+
+    # Footer manuel
+    pdf.set_y(-15)
+    pdf.set_font("Arial", 'I', 8)
+    pdf.cell(0, 10, "Genere par Beer Factory - L'algorithme des brasseurs", 0, 0, 'C')
+
+    return pdf.output(dest='S').encode('latin-1')
+
+# --- CHARGEMENT DUMMY DATA ---
 @st.cache_data
 def load_data():
     try:
         df = pd.read_csv("bieres.csv", sep=";", dtype=str)
         df['Degre'] = df['Degre'].str.replace(',', '.').astype(float)
-        df['Type_lower'] = df['Type'].str.lower()
-        df['Aromes_lower'] = df['Aromes'].str.lower().fillna("")
         return df
-    except Exception:
-        return pd.DataFrame()
-
+    except: return pd.DataFrame()
 df = load_data()
 
-# --- FONCTION GÉNÉRATION PDF DÉTAILLÉ ---
-def create_pdf(style, aromes, volume, degre, 
-               malt_list, # Liste de tuples (poids, nom)
-               levure_info, # Tuple (poids, nom)
-               houblons, # Liste de tuples (poids, nom, temps, usage)
-               process_info): # Dictionnaire avec les temps et températures
-    
-    pdf = FPDF()
-    pdf.add_page()
-    
-    # LOGO (Si présent)
-    if os.path.exists("logo.png"):
-        try:
-            pdf.image("logo.png", x=10, y=8, w=30)
-        except:
-            pass
-
-    # TITRE
-    pdf.set_font("Arial", 'B', 24)
-    pdf.cell(0, 20, txt="Beer Master", ln=1, align='C')
-    
-    pdf.set_font("Arial", 'I', 16)
-    pdf.cell(0, 10, txt=f"Fiche de Brassage : {style}", ln=1, align='C')
-    pdf.ln(10)
-
-    # INFOS GÉNÉRALES
-    pdf.set_font("Arial", 'B', 12)
-    pdf.set_fill_color(230, 230, 230)
-    pdf.cell(0, 10, txt=f"Objectif : {volume} Litres  |  Alcool : {degre}%  |  Profil : {', '.join(aromes)}", ln=1, align='C', fill=True)
-    pdf.ln(10)
-    
-    # --- 1. BILL OF MATERIALS (GRAINS) ---
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, txt="1. Grains & Fermentescibles", ln=1)
-    pdf.set_font("Arial", size=11)
-    
-    total_grain = 0
-    for poids, nom in malt_list:
-        pdf.cell(30, 8, txt=f"{poids:.2f} kg", border=1, align='R')
-        pdf.cell(0, 8, txt=f" {nom}", border=1, ln=1)
-        total_grain += poids
-    
-    pdf.set_font("Arial", 'B', 11)
-    pdf.cell(30, 8, txt=f"Total : {total_grain:.2f} kg", border=0, align='R')
-    pdf.ln(10)
-
-    # --- 2. HOUBLONS ---
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, txt="2. Houblonnage", ln=1)
-    pdf.set_font("Arial", size=11)
-    
-    # En-tête tableau houblon
-    pdf.set_fill_color(240, 240, 240)
-    pdf.cell(30, 8, "Poids", 1, 0, 'C', True)
-    pdf.cell(80, 8, "Variété", 1, 0, 'L', True)
-    pdf.cell(40, 8, "Utilisation", 1, 0, 'L', True)
-    pdf.cell(40, 8, "Durée", 1, 1, 'C', True)
-    
-    for poids, nom, temps, usage in houblons:
-        pdf.cell(30, 8, f"{poids} g", 1, 0, 'C')
-        pdf.cell(80, 8, f" {nom}", 1, 0, 'L')
-        pdf.cell(40, 8, f" {usage}", 1, 0, 'L')
-        pdf.cell(40, 8, f" {temps}", 1, 1, 'C')
-    pdf.ln(10)
-
-    # --- 3. LEVURE ---
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, txt="3. Levure", ln=1)
-    pdf.set_font("Arial", size=11)
-    pdf.cell(0, 8, txt=f"Souche : {levure_info[1]}", ln=1)
-    pdf.cell(0, 8, txt=f"Quantité : {levure_info[0]}g", ln=1)
-    pdf.ln(10)
-
-    # --- 4. EAU & PROCESS ---
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 10, txt="4. Processus & Volumes d'Eau", ln=1)
-    pdf.set_font("Arial", size=11)
-    
-    # Empâtage
-    pdf.cell(95, 10, txt=f"Eau d'Empâtage : {process_info['eau_emp']} L", border=1)
-    pdf.cell(95, 10, txt=f"Palier : {process_info['temp_emp']}°C pendant 60 min", border=1, ln=1)
-    
-    # Rinçage / Ebu
-    pdf.cell(95, 10, txt=f"Eau de Rinçage : {process_info['eau_rinc']} L (75°C)", border=1)
-    pdf.cell(95, 10, txt=f"Ébullition : {process_info['temps_ebu']} min (100°C)", border=1, ln=1)
-    
-    # Fermentation
-    pdf.cell(190, 10, txt=f"Fermentation Primaire : ~15 jours à {process_info['temp_ferm']}°C", border=1, ln=1)
-    
-    # Pied de page
-    pdf.set_y(-20)
-    pdf.set_font("Arial", 'I', 8)
-    pdf.cell(0, 10, "Généré par Beer Master - L'application des brasseurs amateurs", 0, 0, 'C')
-    
-    return pdf.output(dest='S').encode('latin-1', 'replace')
-
-# --- HEADER AVEC LOGO ---
-c_logo1, c_logo2, c_logo3 = st.columns([1, 1, 1])
-with c_logo2:
-    try:
-        st.image("logo.png", use_container_width=True)
-    except:
-        pass
-
-st.markdown('<h1 class="main-title">Beer Master</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">Le générateur de recettes</p>', unsafe_allow_html=True)
-
 # ==========================================
-# PARTIE 1 : RÉGLAGES
+# INTERFACE UTILISATEUR
 # ==========================================
 
-definitions_styles = {
-    "Blonde": "☀️ **La Blonde :** Dorée et accessible. L'équilibre parfait.",
-    "IPA": "🌲 **L'IPA :** L'amertume avant tout, portée par des houblons aromatiques.",
-    "Stout": "☕ **Le Stout :** Sombre, notes de torréfaction intenses.",
-    "Ambrée": "🍂 **L'Ambrée :** La gourmandise du malt caramélisé.",
-    "Blanche": "☁️ **La Blanche :** Fraîcheur, blé et notes acidulées.",
-    "Saison": "🚜 **La Saison :** Bière fermière rustique, sèche, poivrée et très pétillante.",
-    "Sour": "🍋 **La Sour :** L'acidité rafraîchissante, souvent fruitée.",
-    "Lager": "❄️ **La Lager :** Fermentation basse, goût net, croquant et céréalier."
-}
+st.markdown('<h1 class="main-title">Beer Factory</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">Scientific Brewing Algorithm</p>', unsafe_allow_html=True)
 
+# RÉGLAGES
 with st.container(border=True):
-    col_gauche, col_droite = st.columns(2)
-    
-    with col_gauche:
-        st.subheader("Le Style")
-        style = st.selectbox("Quel style de bière ?", ["Blonde", "IPA", "Stout", "Ambrée", "Blanche", "Saison", "Sour", "Lager"])
-        st.info(definitions_styles[style])
-        
-        c1, c2 = st.columns(2)
-        volume = c1.number_input("Volume (Litres)", 5, 100, 20)
-        degre_vise = c2.slider("Degré alcool (%)", 3.0, 12.0, 6.0, 0.1)
-
-    with col_droite:
-        st.subheader("La Palette Aromatique")
-        
-        options_aromes = [
-            "🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", 
-            "☕ Café", "🍫 Chocolat", "🍮 Caramel", "🍪 Biscuit",
-            "🥓 Fumé", "🌶️ Épices", "🌸 Floral", "🍓 Fruits Rouges", "🌿 Herbacé"
-        ]
-
-        aromes_selectionnes = st.pills(
-            "Marqueurs dominants (Max 2) :",
-            options_aromes,
-            default=[], 
-            selection_mode="multi"
-        )
-        
-        trop_d_aromes = False
-        if len(aromes_selectionnes) > 2:
-            st.warning("⚠️ Trop d'arômes tuent l'arôme ! Choisissez-en **2 maximum**.")
-            trop_d_aromes = True
-        
-        st.write("") 
-        amertume = st.select_slider("Amertume (IBU) :", options=["Nulle", "Légère", "Moyenne", "Forte", "Extrême"])
-
-st.write("") 
-
-col_btn1, col_btn2, col_btn3 = st.columns([1, 2, 1])
-with col_btn2:
-    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
-        st.session_state.recette_generee = True
-
-st.divider()
-
-# ==========================================
-# PARTIE 2 : LE RÉSULTAT
-# ==========================================
-
-if st.session_state.recette_generee:
-    
-    # --- 1. CALCULS DES GRAINS ---
-    total_malt = round((volume * degre_vise) / 100 * 4.5, 2)
-    ratio_base = 0.90; ratio_spe = 0.10
-    
-    malt_base_nom = "Malt Pilsner"; malt_spe_nom = "Malt de Blé"
-    levure = "US-05 (Neutre)"
-    houblon_amer = "Magnum"; houblon_arome = "Saaz"
-    temp_empatage = 65; temps_ebu = 60; temp_ferm = 20
-    
-    # Logique Style
-    if style == "IPA":
-        malt_base_nom = "Malt Pale Ale"; malt_spe_nom = "Malt Carapils"; levure = "Verdant IPA"; temp_empatage = 64; ratio_base = 0.93; ratio_spe = 0.07 
-    elif style == "Stout":
-        malt_base_nom = "Malt Maris Otter"; malt_spe_nom = "Malt Chocolat & Orge Grillé"; levure = "S-04"; temp_empatage = 68; ratio_base = 0.85; ratio_spe = 0.15 
-    elif style == "Ambrée":
-        malt_base_nom = "Malt Pale Ale"; malt_spe_nom = "Malt Cara Ruby"; levure = "T-58"; temp_empatage = 67; ratio_base = 0.85; ratio_spe = 0.15
-    elif style == "Blanche":
-        malt_base_nom = "Malt Pilsner"; malt_spe_nom = "Froment (Blé Cru)"; levure = "WB-06"; ratio_base = 0.60; ratio_spe = 0.40 
-    elif style == "Saison":
-        malt_base_nom = "Malt Pilsner"; malt_spe_nom = "Malt Munich"; levure = "Belle Saison"; temp_ferm = 26; temp_empatage = 63
-    elif style == "Sour":
-        malt_base_nom = "Malt Pilsner"; malt_spe_nom = "Malt Acide"; levure = "Philly Sour"
-    elif style == "Lager":
-        malt_base_nom = "Malt Pilsner"; malt_spe_nom = "Malt Vienna"; levure = "W-34/70"; temp_ferm = 12; temps_ebu = 90
-
-    aromes_clean = [a.split(" ")[1] if " " in a else a for a in aromes_selectionnes]
-    if "Biscuit" in aromes_clean: malt_spe_nom += " + Malt Biscuit"
-    if "Fumé" in aromes_clean: malt_base_nom = "Malt Fumé (Beechwood)"
-    if "Caramel" in aromes_clean and style != "Ambrée": malt_spe_nom += " + Malt Crystal 150"
-
-    # Calcul des poids AVEC ARRONDI 0.05
-    poids_base = round_grain(total_malt * ratio_base)
-    poids_spe = round_grain(total_malt * ratio_spe)
-    # Recalcul du total affiché pour être cohérent avec les arrondis
-    total_grain_affiche = poids_base + poids_spe
-
-    # --- 2. CALCULS HOUBLONS ---
-    if "Agrumes" in aromes_clean: houblon_arome = "Citra & Amarillo"
-    elif "Tropical" in aromes_clean: houblon_arome = "Galaxy & Mosaic"
-    elif "Pin" in aromes_clean: houblon_arome = "Simcoe & Chinook"
-    elif "Floral" in aromes_clean: houblon_arome = "Mistral"
-    elif "Herbacé" in aromes_clean: houblon_arome = "Hallertau Mittelfrüh"
-    elif "Fruits" in aromes_clean: houblon_arome = "Barbe Rouge"
-    elif "Café" in aromes_clean: houblon_arome = "Fuggles"
-
-    ibu_target = 20
-    if amertume == "Moyenne": ibu_target = 40
-    elif amertume == "Forte": ibu_target = 60
-    elif amertume == "Extrême": ibu_target = 90
-    
-    grammes_amer = volume * (ibu_target / 25) 
-    grammes_arome = volume * 4 if ibu_target > 40 else volume * 2
-
-    # --- 3. CALCUL LEVURE ---
-    nb_sachets = 1; poids_levure = 11.5
-    if volume > 25 or degre_vise > 7.5:
-        nb_sachets = 2; poids_levure = 23
-
-    # --- 4. CALCULS EAU ---
-    eau_empatage = total_grain_affiche * 3.0
-    absorption = total_grain_affiche * 1.0
-    volume_pre_ebu = volume * 1.15 
-    jus_recupere = eau_empatage - absorption
-    eau_rincage = volume_pre_ebu - jus_recupere
-    if eau_rincage < 0: eau_rincage = 0
-
-    # --- PRÉPARATION LISTES POUR PDF ---
-    malt_list_export = [
-        (poids_base, malt_base_nom),
-        (poids_spe, malt_spe_nom)
-    ]
-    
-    houblons_export = [
-        (int(grammes_amer), houblon_amer, "60 min", "Amérisant"),
-        (int(grammes_arome), houblon_arome, "5 min", "Aromatique")
-    ]
-    if "Tropical" in aromes_clean or "Agrumes" in aromes_clean:
-         houblons_export.append((int(grammes_arome), houblon_arome, "3 jours", "Dry Hop"))
-
-    process_export = {
-        "eau_emp": f"{eau_empatage:.1f}",
-        "temp_emp": temp_empatage,
-        "eau_rinc": f"{eau_rincage:.1f}",
-        "temps_ebu": temps_ebu,
-        "temp_ferm": temp_ferm
-    }
-
-    # --- AFFICHAGE RECETTE ECRAN ---
-    st.header(f"📜 Fiche Technique : {style} {', '.join(aromes_clean)}")
-
     c1, c2 = st.columns(2)
     with c1:
-        with st.container(border=True):
-            st.markdown("### 🌾 Bill of Materials")
-            st.write(f"**Total Grains : {total_grain_affiche:.2f} kg**")
-            st.write(f"- **{poids_base:.2f} kg** : {malt_base_nom}")
-            st.write(f"- **{poids_spe:.2f} kg** : {malt_spe_nom}")
-            st.markdown("---")
-            st.markdown("### 🦠 Levure")
-            st.write(f"**{poids_levure}g** ({nb_sachets} sachet{'s' if nb_sachets > 1 else ''}) : **{levure}**")
-
+        style = st.selectbox("Style", ["Blonde", "IPA", "Stout", "Ambrée", "Blanche", "Saison"])
+        volume = st.number_input("Volume (L)", 5, 100, 20)
+        degre_vise = st.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
     with c2:
-        with st.container(border=True):
-            st.markdown("### 🌿 Houblonnage")
-            for h_poids, h_nom, h_temps, h_usage in houblons_export:
-                st.write(f"- **{h_poids}g** {h_nom} ({h_usage} - {h_temps})")
+        aromes_selectionnes = st.pills("Profil Aromatique", ["🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", "☕ Café", "🍪 Biscuit"], selection_mode="multi")
+        amertume = st.select_slider("Amertume", options=["Douce", "Standard", "Prononcée", "Amère"])
+        ibu_target = {"Douce": 15, "Standard": 25, "Prononcée": 40, "Amère": 60}[amertume]
 
-    # --- PROCESSUS & EAU ---
-    st.subheader("⏳ Profil de Brassage & Volumes d'Eau")
+    if st.button("LANCER LA PRODUCTION", type="primary", use_container_width=True):
+        st.session_state.recette_generee = True
+
+# RÉSULTATS & CALCULS
+if st.session_state.recette_generee:
     
-    col_p1, col_p2, col_p3, col_p4 = st.columns(4)
+    # 1. INIT VARIABLES
+    base_malt, spe_malt, yeast = "Pilsner", "Blé (Froment)", "US-05"
+    hop_amer, hop_aroma = "Magnum", "Saaz"
+    ratio_base, ratio_spe = 0.90, 0.10
     
-    col_p1.metric("1. Empâtage (60 min)", f"{temp_empatage}°C", f"Eau: {eau_empatage:.1f} L")
-    col_p2.metric("2. Rinçage", "75°C", f"Eau: {eau_rincage:.1f} L")
-    col_p3.metric("3. Ébullition", f"{temps_ebu} min", "100°C")
-    col_p4.metric("4. Fermentation", f"{temp_ferm}°C", "15 jours")
-
-    # --- BOUTON PDF (NOUVEAU) ---
-    st.write("")
-    pdf_bytes = create_pdf(style, aromes_clean, volume, degre_vise,
-                           malt_list_export, 
-                           (poids_levure, levure), 
-                           houblons_export,
-                           process_export)
-    
-    st.download_button(label="📥 TÉLÉCHARGER MA RECETTE EN PDF", 
-                       data=pdf_bytes, 
-                       file_name=f"recette_{style}.pdf", 
-                       mime='application/pdf', 
-                       use_container_width=True)
-
-    st.divider()
-
-    # --- MATCHING ---
-    st.header("(Pour comparer :)")
-    
-    if not df.empty and aromes_selectionnes:
-        suggestions = []
-        mots_cles_user = [a.split(" ")[1].lower() if " " in a else a.lower() for a in aromes_selectionnes]
-        
-        for index, row in df.iterrows():
-            score = 0
-            raisons = []
-            if style.lower() in str(row['Type_lower']):
-                score += 2
-                raisons.append("Style identique")
-            
-            match_arome = False
-            for mot in mots_cles_user:
-                if mot in str(row['Aromes_lower']):
-                    match_arome = True
-                    raisons.append(f"Note de {mot}")
-            if match_arome: score += 3 
-            
-            if abs(row['Degre'] - degre_vise) <= 1.5: score += 1
-
-            if score >= 3: suggestions.append((row, score, raisons))
-        
-        if suggestions:
-            suggestions.sort(key=lambda x: x[1], reverse=True)
-            top_match = suggestions[0]
-            beer, score, raisons = top_match
-
-            col_vide1, col_center, col_vide2 = st.columns([1, 2, 1])
-            with col_center:
-                with st.container(border=True):
-                    st.markdown(f"<h3 style='text-align: center; color: #e67e22;'>🏆 {beer['Nom']}</h3>", unsafe_allow_html=True)
-                    st.caption(f"<div style='text-align: center;'>{beer['Type']} | {beer['Degre']}°</div>", unsafe_allow_html=True)
-                    st.success(f"Pourquoi ? {', '.join(raisons)}")
-                    st.write(f"*{beer['Description']}*")
-                    
-                    if pd.notna(beer['Lien_Achat']) and str(beer['Lien_Achat']).startswith('http'):
-                        st.link_button("🛒 Commander pour goûter", beer['Lien_Achat'], type="primary", use_container_width=True)
-                    else:
-                        st.button("Indisponible en ligne", disabled=True, use_container_width=True)
-        else:
-            st.warning(f"Aucune bière commerciale correspondante dans la base.")
-    else:
-         st.info("Sélectionnez des arômes pour voir le comparatif.")
-
-else:
-    st.info("👆 Configurez vos préférences ci-dessus et cliquez sur le bouton.")
-    for _ in range(5): st.write("")
+    # LOGIQUE STYLE
+    if style == "IPA": base_malt="Pale Ale"; spe_malt="Carapils"; ratio_base=0.94; ratio_spe=0.06; yeast="Verdant IPA"; hop_aroma="Citra"
+    elif style == "Stout": base_malt="Maris Otter"; spe_malt="Chocolat"; ratio_base=0.85; ratio_spe
