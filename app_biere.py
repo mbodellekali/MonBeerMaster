@@ -24,7 +24,7 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS CORRECTIF & ARCHITECTURAL ---
+# --- STYLE CSS ARCHITECTURAL & HARMONISÉ ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
@@ -37,31 +37,28 @@ st.markdown("""
         --text-dark: #1a120b;
     }
 
-    /* 1. CADRE EXTERIEUR MASSIF */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: 'Roboto', sans-serif;
         
+        /* CADRE EXTERIEUR MASSIF */
         border: 50px solid var(--dark-brown);
         box-shadow: inset 0 0 0 5px var(--primary-amber);
-        padding: 20px; 
+        padding: 20px;
     }
     
     @media (max-width: 640px) {
-        .stApp {
-            border: 15px solid var(--dark-brown);
-            padding: 5px;
-        }
+        .stApp { border: 15px solid var(--dark-brown); padding: 5px; }
     }
 
-    /* 2. MODULES INTERNES */
+    /* MODULES (CADRES) */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
         border: 6px solid var(--dark-brown) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
         border-radius: 4px;
-        background-color: rgba(255,255,255, 0.85) !important;
-        padding: 20px !important;
+        background-color: rgba(255,255,255, 0.9) !important;
+        padding: 25px !important;
         margin-bottom: 20px;
     }
 
@@ -130,7 +127,7 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- PILLS (AROMES) --- */
+    /* --- STYLE DES BOUTONS PILLS (AROMES) --- */
     [data-testid="stPills"] button {
         background-color: #ffffff !important; 
         border: 2px solid var(--dark-brown) !important;
@@ -153,9 +150,40 @@ st.markdown("""
         transform: scale(1.02);
     }
 
-    /* METRICS */
-    div[data-testid="stMetricLabel"] { color: var(--dark-brown); font-weight: 700; text-transform: uppercase;}
-    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; font-family: 'Rye', serif; }
+    /* --- NOUVEAU STYLE CARTES PROCESSUS (HTML/CSS CUSTOM) --- */
+    .process-card {
+        background-color: #ffffff;
+        border: 2px solid var(--dark-brown);
+        border-left: 6px solid var(--primary-amber); /* Accent visuel */
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        text-align: center;
+        height: 100%;
+    }
+    .process-step {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 900;
+        color: var(--dark-brown);
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+        letter-spacing: 1px;
+    }
+    .process-value {
+        font-family: 'Rye', serif;
+        color: var(--primary-amber);
+        font-size: 1.8rem;
+        line-height: 1.2;
+    }
+    .process-detail {
+        font-family: 'Roboto', sans-serif;
+        color: #555;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        font-weight: 500;
+    }
     
     .block-container { padding-top: 1rem; padding-bottom: 5rem; }
     </style>
@@ -253,10 +281,7 @@ with st.container(border=True):
         st.caption(definitions_styles[style])
         
         c_v, c_a = st.columns(2)
-        
-        # MODIFICATION DU VOLUME : SLIDER 10L - 100L (Pas de 10)
         volume = c_v.slider("Volume (L)", 10, 100, 20, 10)
-        
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
         
         st.write("")
@@ -372,17 +397,46 @@ if st.session_state.recette_generee:
         
         with col_res2:
             st.markdown('<p class="subheader-text">⏳ PROCESSUS</p>', unsafe_allow_html=True)
+            
+            # REMPLACEMENT DES METRICS PAR DU HTML CUSTOM "CARTE DE PROCESS"
+            
             c1, c2 = st.columns(2)
-            c1.metric("1. Empâtage", "60 min", "67°C")
-            c2.metric("Eau", f"{eau_empatage:.1f} L")
-            st.divider()
-            c1, c2 = st.columns(2)
-            c1.metric("2. Rinçage", "Batch", "75°C")
-            c2.metric("Eau", f"{eau_rincage:.1f} L")
-            st.divider()
-            st.metric("3. Ébullition (100°C)", "60 min")
-            st.divider()
-            st.metric("4. Fermentation (20°C)", "~15 jours")
+            with c1:
+                st.markdown(f"""
+                <div class="process-card">
+                    <div class="process-step">1. EMPÂTAGE</div>
+                    <div class="process-value">67°C</div>
+                    <div class="process-detail">60 min<br>Eau: {eau_empatage:.1f} L</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with c2:
+                st.markdown(f"""
+                <div class="process-card">
+                    <div class="process-step">2. RINÇAGE</div>
+                    <div class="process-value">75°C</div>
+                    <div class="process-detail">Batch<br>Eau: {eau_rincage:.1f} L</div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            st.write("") # Espace
+            
+            c3, c4 = st.columns(2)
+            with c3:
+                st.markdown(f"""
+                <div class="process-card">
+                    <div class="process-step">3. ÉBULLITION</div>
+                    <div class="process-value">100°C</div>
+                    <div class="process-detail">60 min<br>Ajout Houblons</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with c4:
+                st.markdown(f"""
+                <div class="process-card">
+                    <div class="process-step">4. FERMENTATION</div>
+                    <div class="process-value">20°C</div>
+                    <div class="process-detail">~15 Jours<br>À l'abri du soleil</div>
+                </div>
+                """, unsafe_allow_html=True)
 
         st.write("")
         st.divider()
