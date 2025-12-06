@@ -6,7 +6,7 @@ import math
 # --- CONFIGURATION INITIALE ---
 st.set_page_config(page_title="Beer Factory", page_icon="🍺", layout="wide")
 
-# --- GESTION ÉTAT (SESSION STATE) ---
+# --- GESTION ÉTAT ---
 if 'selected_aromas' not in st.session_state:
     st.session_state.selected_aromas = []
 if 'recette_generee' not in st.session_state:
@@ -18,7 +18,6 @@ AROMA_DATA = [
     ("☕", "Café"), ("🍫", "Chocolat"), ("🍮", "Caramel"), ("🍪", "Biscuit"), 
     ("🥓", "Fumé"), ("🌶️", "Épices"), ("🌸", "Floral")
 ]
-# Dictionnaire inverse pour les calculs
 AROMA_DICT = {emoji: name for emoji, name in AROMA_DATA}
 
 # --- MOTEUR DE CALCULS ---
@@ -94,23 +93,28 @@ st.markdown("""
         font-family: 'Rye', serif;
     }
 
-    /* BOUTONS GENERAUX (Générer/Télécharger) */
+    /* BOUTONS GENERAUX (Générer) */
     div.stButton > button {
         border: 3px solid var(--dark-brown); border-radius: 4px; 
         font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
         box-shadow: 4px 4px 0px var(--dark-brown); transition: all 0.1s;
         width: 100%;
+        font-family: 'Rye', serif;
     }
-    /* Bouton Principal (Ambre) */
+    
+    /* Bouton Principal (Générer) */
     div.stButton > button[kind="primary"] {
         background-color: var(--primary-amber); color: white !important;
+        font-size: 1.3rem; padding: 0.8rem 1.5rem;
     }
-    /* Bouton Secondaire (Blanc - Pour les arômes non sélectionnés) */
+    
+    /* Bouton Secondaire (Arômes non sélectionnés) */
     div.stButton > button[kind="secondary"] {
         background-color: #ffffff; color: var(--dark-brown) !important;
         font-size: 1.5rem; /* Gros Emoji */
         padding: 0.2rem 0rem;
     }
+    
     div.stButton > button:hover {
         transform: translate(1px, 1px);
         box-shadow: 2px 2px 0px var(--dark-brown);
@@ -133,7 +137,7 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* LABEL ETIQUETTE BOUTON */
+    /* LABEL ETIQUETTE BOUTON AROME */
     .btn-label {
         text-align: center; font-family: 'Roboto', sans-serif;
         color: var(--dark-brown); font-weight: 900; font-size: 0.8rem;
@@ -191,7 +195,6 @@ def create_pdf_compact(data):
     pdf = PDF(); pdf.add_page(); pdf.set_auto_page_break(auto=True, margin=10)
     pdf.set_font("Arial", 'B', 14); pdf.cell(0, 8, f"Fiche de Production : {data['style'].upper()}", ln=True, align='C')
     pdf.set_font("Arial", 'I', 11)
-    # Conversion Emoji vers Texte pour PDF
     aromes_noms = [AROMA_DICT.get(e, "") for e in data['aromes']]
     aromes_txt = ", ".join(aromes_noms).encode('latin-1', 'replace').decode('latin-1')
     pdf.cell(0, 6, f"Profil : {aromes_txt}", ln=True, align='C'); pdf.ln(5)
@@ -267,7 +270,6 @@ with st.container(border=True):
         st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES (MAX 2)</p>', unsafe_allow_html=True)
         
         # LOGIQUE DE GRILLE POUR LES BOUTONS
-        # On découpe la liste AROMA_DATA en chunks de 4 par ligne
         cols_per_row = 4
         rows = [AROMA_DATA[i:i + cols_per_row] for i in range(0, len(AROMA_DATA), cols_per_row)]
         
@@ -305,10 +307,9 @@ except:
 
 st.write("")
 
-c_b1, c_b2, c_b3 = st.columns([1, 1, 1])
+c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
-    st.markdown('<div class="btn-label">GÉNÉRER MA RECETTE</div>', unsafe_allow_html=True)
-    if st.button("🍺", type="primary", use_container_width=True):
+    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True):
         st.session_state.recette_generee = True
 
 st.write("")
@@ -328,7 +329,6 @@ if st.session_state.recette_generee:
     elif style == "Saison": malt_base_nom="Pilsner"; malt_spe_nom="Munich"; levure="Belle Saison"
     elif style == "Lager": malt_base_nom="Pilsner"; malt_spe_nom="Vienna"; levure="W-34/70"
     
-    # Traduction Emoji -> Nom pour la logique
     aromes_clean = [AROMA_DICT[e] for e in st.session_state.selected_aromas]
     
     if "Biscuit" in aromes_clean: malt_spe_nom = "Biscuit"
