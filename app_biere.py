@@ -24,7 +24,7 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS ARCHITECTURAL & HARMONISÉ ---
+# --- STYLE CSS ARCHITECTURAL & CORRECTION CONTRASTE ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
@@ -37,12 +37,12 @@ st.markdown("""
         --text-dark: #1a120b;
     }
 
+    /* 1. FOND ET CADRE PRINCIPAL MASSIF */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: 'Roboto', sans-serif;
         
-        /* CADRE EXTERIEUR MASSIF */
         border: 50px solid var(--dark-brown);
         box-shadow: inset 0 0 0 5px var(--primary-amber);
         padding: 20px;
@@ -52,12 +52,17 @@ st.markdown("""
         .stApp { border: 15px solid var(--dark-brown); padding: 5px; }
     }
 
-    /* MODULES (CADRES) */
+    /* 2. MODULES INTERNES (CORRECTION CONTRASTE ICI) */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
         border: 6px solid var(--dark-brown) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
         border-radius: 4px;
-        background-color: rgba(255,255,255, 0.9) !important;
+        
+        /* FOND BLANC SOLIDE POUR LA LISIBILITÉ */
+        background-color: #ffffff !important;
+        /* FORCE LA COULEUR DU TEXTE EN MARRON */
+        color: var(--text-dark) !important;
+        
         padding: 25px !important;
         margin-bottom: 20px;
     }
@@ -127,7 +132,7 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- STYLE DES BOUTONS PILLS (AROMES) --- */
+    /* PILLS (AROMES) */
     [data-testid="stPills"] button {
         background-color: #ffffff !important; 
         border: 2px solid var(--dark-brown) !important;
@@ -150,17 +155,17 @@ st.markdown("""
         transform: scale(1.02);
     }
 
-    /* --- NOUVEAU STYLE CARTES PROCESSUS (HTML/CSS CUSTOM) --- */
+    /* --- CARTES PROCESSUS HARMONISÉES --- */
     .process-card {
         background-color: #ffffff;
-        border: 2px solid var(--dark-brown);
-        border-left: 6px solid var(--primary-amber); /* Accent visuel */
+        border: 4px solid var(--dark-brown);
+        box-shadow: inset 0 0 0 1px var(--primary-amber);
         padding: 15px;
         margin-bottom: 10px;
         border-radius: 4px;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
         text-align: center;
         height: 100%;
+        color: var(--text-dark); /* Assure la couleur du texte */
     }
     .process-step {
         font-family: 'Roboto', sans-serif;
@@ -184,6 +189,10 @@ st.markdown("""
         margin-top: 5px;
         font-weight: 500;
     }
+    
+    /* METRICS (S'il en reste) */
+    div[data-testid="stMetricLabel"] { color: var(--dark-brown); font-weight: 700; text-transform: uppercase;}
+    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; font-family: 'Rye', serif; }
     
     .block-container { padding-top: 1rem; padding-bottom: 5rem; }
     </style>
@@ -286,8 +295,8 @@ with st.container(border=True):
         
         st.write("")
         st.write("")
-        amertume = st.select_slider("Amertume Ciblée", options=["Nulle", "Légère", "Moyenne", "Forte", "Extrême"])
-        ibu_map = {"Nulle": 5, "Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
+        amertume = st.select_slider("Amertume Ciblée", options=["Légère", "Moyenne", "Forte", "Extrême"])
+        ibu_map = {"Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
 
     with col2:
@@ -373,7 +382,8 @@ if st.session_state.recette_generee:
     }
     
     with st.container(border=True): 
-        st.markdown(f"<h2 style='text-align: center; border-bottom: none;'>FICHE DE PRODUCTION : {style.upper()}</h2>", unsafe_allow_html=True)
+        # CHANGEMENT DU TITRE ICI
+        st.markdown(f"<h2 style='text-align: center; border-bottom: none;'>MA RECETTE : {style.upper()}</h2>", unsafe_allow_html=True)
         if aromes_clean: st.caption(f"<p style='text-align: center; font-style:italic;'>Notes : {', '.join(aromes_clean)}</p>", unsafe_allow_html=True)
         st.write("")
 
@@ -398,8 +408,6 @@ if st.session_state.recette_generee:
         with col_res2:
             st.markdown('<p class="subheader-text">⏳ PROCESSUS</p>', unsafe_allow_html=True)
             
-            # REMPLACEMENT DES METRICS PAR DU HTML CUSTOM "CARTE DE PROCESS"
-            
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown(f"""
@@ -414,11 +422,11 @@ if st.session_state.recette_generee:
                 <div class="process-card">
                     <div class="process-step">2. RINÇAGE</div>
                     <div class="process-value">75°C</div>
-                    <div class="process-detail">Batch<br>Eau: {eau_rincage:.1f} L</div>
+                    <div class="process-detail">Eau: {eau_rincage:.1f} L</div>
                 </div>
                 """, unsafe_allow_html=True)
             
-            st.write("") # Espace
+            st.write("") 
             
             c3, c4 = st.columns(2)
             with c3:
