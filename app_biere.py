@@ -24,26 +24,22 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS FINALISÉ ---
+# --- STYLE CSS CORRECTIF ---
 st.markdown("""
     <style>
-    /* --- PALETTE DE COULEURS --- */
+    /* --- PALETTE --- */
     :root {
-        /* COULEUR EXACTE DE VOTRE LOGO */
         --couleur-fond-logo: #FCF6ED; 
-        
         --primary-amber: #C27818;
         --dark-slate: #2C3E50;
         --text-dark: #222222;
     }
 
-    /* FOND GÉNÉRAL ET CADRE EXTERNE */
+    /* FOND APP */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        
-        /* Cadre Artistique Externe */
         border: 15px solid var(--dark-slate);
         box-shadow: inset 0 0 0 4px var(--primary-amber);
         margin: 10px;
@@ -51,86 +47,89 @@ st.markdown("""
     }
 
     /* TITRES */
-    h1, h2, h3 {
-        color: var(--dark-slate) !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 700;
-    }
+    h1, h2, h3 { color: var(--dark-slate) !important; text-transform: uppercase; font-weight: 700; }
     
-    /* SOUS-TITRES DANS L'APP */
+    /* SOUS-TITRES */
     .subheader-text {
-        color: var(--primary-amber);
-        font-weight: bold;
-        font-size: 1.1em;
-        margin-bottom: 15px;
-        border-bottom: 2px solid var(--primary-amber);
-        padding-bottom: 5px;
-        display: inline-block;
+        color: var(--primary-amber); font-weight: bold; font-size: 1.1em;
+        margin-bottom: 15px; border-bottom: 2px solid var(--primary-amber);
+        padding-bottom: 5px; display: inline-block;
     }
 
-    /* BOUTONS */
+    /* BOUTONS D'ACTION */
     div.stButton > button {
-        background-color: var(--primary-amber);
-        color: white !important;
-        border: none;
-        border-radius: 4px;
-        padding: 0.8rem 1.5rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        transition: background-color 0.3s;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-        font-size: 1.1rem;
+        background-color: var(--primary-amber); color: white !important;
+        border: none; border-radius: 4px; padding: 0.8rem 1.5rem;
+        font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2); font-size: 1.1rem;
     }
-    div.stButton > button:hover {
-        background-color: var(--dark-slate);
-    }
+    div.stButton > button:hover { background-color: var(--dark-slate); }
 
-    /* --- CORRECTION VISIBILITÉ INPUTS --- */
+    /* INPUTS (Selectbox, NumberInput) - Force fond blanc et texte noir */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div,
     div[data-baseweb="base-input"] {
         background-color: #ffffff !important;
-        color: var(--dark-slate) !important;
+        color: #000000 !important;
         border: 1px solid #cccccc;
-        border-radius: 4px;
     }
-    input[type="number"] { color: var(--dark-slate) !important; }
+    /* Couleur du texte dans les inputs */
+    input[type="number"], div[data-baseweb="select"] span {
+         color: #000000 !important;
+         -webkit-text-fill-color: #000000 !important;
+    }
     
-    /* Labels des inputs */
+    /* LABELS */
     .stSelectbox label, .stNumberInput label, .stSlider label, .stPills label {
-        color: var(--dark-slate) !important;
-        font-weight: 700;
+        color: var(--dark-slate) !important; font-weight: 700;
     }
 
-    /* Curseur des sliders */
-    div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
-    div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
-
-    /* --- CORRECTION ARÔMES (PILLS) --- */
-    span[data-baseweb="tag"] {
+    /* --- CORRECTION CRITIQUE : ARÔMES (PILLS) --- */
+    /* Force le fond blanc et bordure ambre pour les options non sélectionnées */
+    div[data-baseweb="select"] span[role="listbox"] {
+        background-color: white !important;
+    }
+    
+    /* Ciblage spécifique des pills Streamlit */
+    div[data-testid="stPills"] button {
         background-color: #ffffff !important;
         border: 1px solid var(--primary-amber) !important;
-        color: var(--dark-slate) !important;
-        font-weight: 600;
-    }
-    span[data-baseweb="tag"] span {
-        color: var(--dark-slate) !important;
     }
     
-    /* --- CADRES ARTISTIQUES INTERNES --- */
+    /* Force le texte en noir à l'intérieur des pills */
+    div[data-testid="stPills"] button p {
+        color: #000000 !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Changement au survol ou sélection (optionnel, Streamlit gère le selected) */
+    div[data-testid="stPills"] button:hover {
+        border-color: var(--dark-slate) !important;
+    }
+
+    /* --- CORRECTION CRITIQUE : VISIBILITÉ RESULTATS --- */
+    /* Augmentation de l'opacité du fond des cartes (0.9 au lieu de 0.4) */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
         border: 4px solid var(--dark-slate) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
         border-radius: 8px;
-        background-color: rgba(255,255,255, 0.4); 
+        background-color: rgba(255,255,255, 0.95) !important; /* Quasi opaque pour lisibilité */
         padding: 20px !important;
     }
     
-    /* METRICS */
-    div[data-testid="stMetricLabel"] { color: var(--dark-slate); font-size: 0.9em; font-weight: 600;}
-    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; }
+    /* METRICS (Processus) - Force les couleurs */
+    div[data-testid="stMetricLabel"] { 
+        color: var(--dark-slate) !important; 
+        font-size: 1em !important; 
+        font-weight: 700 !important;
+    }
+    div[data-testid="stMetricValue"] { 
+        color: var(--primary-amber) !important; 
+        font-weight: 800 !important; 
+    }
+    div[data-testid="stMetricDelta"] {
+        color: var(--dark-slate) !important;
+    }
     
     .block-container { padding-top: 2rem; padding-bottom: 5rem; }
     hr { margin: 3rem 0; border-color: var(--dark-slate); opacity: 0.2; }
@@ -215,22 +214,20 @@ def create_pdf_compact(data):
     return pdf.output(dest='S').encode('latin-1')
 
 # ==========================================
-# UI HEADER
+# HEADER RESTRUCTURÉ
 # ==========================================
-c_logo1, c_logo2, c_logo3 = st.columns([1, 1, 1])
-with c_logo2:
-    try: st.image("logo.png", use_container_width=True)
-    except: pass
 
 st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
-st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">le générateur de recettes de bières</p>', unsafe_allow_html=True)
 
-# INSERTION DE LA FRISE ICI
-try:
-    st.image("frise.png", use_container_width=True)
-except Exception:
-    st.write("") # Espace vide si l'image n'est pas encore là
+# LOGO (CENTRÉ)
+c1, c2, c3 = st.columns([1.5, 1, 1.5])
+with c2:
+    try:
+        st.image("logo.png", use_container_width=True)
+    except:
+        pass
 
+st.markdown('<p style="text-align: center; color: #C27818; margin-top: 10px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">le générateur de recettes de bières</p>', unsafe_allow_html=True)
 st.write("")
 
 # ==========================================
@@ -276,6 +273,13 @@ c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
     if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
         st.session_state.recette_generee = True
+
+st.write("")
+try:
+    st.image("frise.png", use_container_width=True)
+except Exception:
+    st.write("") 
+st.write("")
 
 # ==========================================
 # RÉSULTATS
