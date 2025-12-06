@@ -93,45 +93,31 @@ st.markdown("""
         font-family: 'Rye', serif;
     }
 
-    /* --- STABILISATION DES BOUTONS --- */
+    /* BOUTONS GENERAUX (Générer) */
     div.stButton > button {
-        border: 3px solid var(--dark-brown) !important; /* Important pour éviter le changement de taille */
-        border-radius: 4px; 
+        border: 3px solid var(--dark-brown); border-radius: 4px; 
         font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
-        box-shadow: 4px 4px 0px var(--dark-brown); 
+        box-shadow: 4px 4px 0px var(--dark-brown); transition: all 0.1s;
         width: 100%;
-        min-height: 60px !important; /* Hauteur fixe pour éviter le saut */
-        margin: 0px !important;
+        font-family: 'Rye', serif;
     }
     
-    /* Bouton Principal (Sélectionné / Générer) */
+    /* Bouton Principal (Générer) */
     div.stButton > button[kind="primary"] {
-        background-color: var(--primary-amber) !important; 
-        color: white !important;
-        font-size: 1.3rem; 
+        background-color: var(--primary-amber); color: white !important;
+        font-size: 1.3rem; padding: 0.8rem 1.5rem;
     }
     
-    /* Bouton Secondaire (Non sélectionné) */
+    /* Bouton Secondaire (Arômes non sélectionnés) */
     div.stButton > button[kind="secondary"] {
-        background-color: #ffffff !important; 
-        color: var(--dark-brown) !important;
-        font-size: 1.5rem; 
+        background-color: #ffffff; color: var(--dark-brown) !important;
+        font-size: 1.5rem; /* Gros Emoji */
+        padding: 0.2rem 0rem;
     }
     
-    /* Effet survol (sans changement de taille) */
     div.stButton > button:hover {
-        background-color: #f0f0f0; 
-        border-color: var(--dark-brown) !important;
-        color: var(--dark-brown);
-    }
-    div.stButton > button[kind="primary"]:hover {
-        background-color: #d35400 !important;
-        color: white !important;
-    }
-    
-    div.stButton > button:active {
+        transform: translate(1px, 1px);
         box-shadow: 2px 2px 0px var(--dark-brown);
-        transform: translate(2px, 2px);
     }
 
     /* INPUTS */
@@ -283,7 +269,6 @@ with st.container(border=True):
     with col2:
         st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES (MAX 2)</p>', unsafe_allow_html=True)
         
-        # LOGIQUE DE GRILLE POUR LES BOUTONS
         cols_per_row = 4
         rows = [AROMA_DATA[i:i + cols_per_row] for i in range(0, len(AROMA_DATA), cols_per_row)]
         
@@ -318,10 +303,9 @@ except:
 
 st.write("")
 
-c_b1, c_b2, c_b3 = st.columns([1, 1, 1])
+c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
-    st.markdown('<div class="btn-label">GÉNÉRER MA RECETTE</div>', unsafe_allow_html=True)
-    if st.button("🍺", type="primary", use_container_width=True):
+    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True):
         st.session_state.recette_generee = True
 
 st.write("")
