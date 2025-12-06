@@ -24,12 +24,12 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS FINALISÉ (AVEC VOTRE COULEUR #FCF6ED) ---
+# --- STYLE CSS FINALISÉ ---
 st.markdown("""
     <style>
     /* --- PALETTE DE COULEURS --- */
     :root {
-        /* COULEUR EXACTE DE VOTRE LOGO (RGB 252, 246, 237) */
+        /* COULEUR EXACTE DE VOTRE LOGO */
         --couleur-fond-logo: #FCF6ED; 
         
         --primary-amber: #C27818;
@@ -88,7 +88,6 @@ st.markdown("""
     }
 
     /* --- CORRECTION VISIBILITÉ INPUTS --- */
-    /* Force le fond blanc et le texte foncé pour les champs de saisie */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div,
     div[data-baseweb="base-input"] {
@@ -97,10 +96,7 @@ st.markdown("""
         border: 1px solid #cccccc;
         border-radius: 4px;
     }
-    /* Force la couleur du texte tapé dans les inputs numériques */
-    input[type="number"] {
-         color: var(--dark-slate) !important;
-    }
+    input[type="number"] { color: var(--dark-slate) !important; }
     
     /* Labels des inputs */
     .stSelectbox label, .stNumberInput label, .stSlider label, .stPills label {
@@ -112,12 +108,15 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* PILLS (Tags arômes) */
+    /* --- CORRECTION ARÔMES (PILLS) --- */
     span[data-baseweb="tag"] {
         background-color: #ffffff !important;
-        border: 2px solid var(--primary-amber) !important;
+        border: 1px solid var(--primary-amber) !important;
         color: var(--dark-slate) !important;
         font-weight: 600;
+    }
+    span[data-baseweb="tag"] span {
+        color: var(--dark-slate) !important;
     }
     
     /* --- CADRES ARTISTIQUES INTERNES --- */
@@ -125,7 +124,7 @@ st.markdown("""
         border: 4px solid var(--dark-slate) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
         border-radius: 8px;
-        background-color: rgba(255,255,255, 0.4); /* Transparence légère pour fondre avec le fond */
+        background-color: rgba(255,255,255, 0.4); 
         padding: 20px !important;
     }
     
@@ -225,6 +224,13 @@ with c_logo2:
 
 st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
 st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">le générateur de recettes de bières</p>', unsafe_allow_html=True)
+
+# INSERTION DE LA FRISE ICI
+try:
+    st.image("frise.png", use_container_width=True)
+except Exception:
+    st.write("") # Espace vide si l'image n'est pas encore là
+
 st.write("")
 
 # ==========================================
@@ -261,14 +267,14 @@ with st.container(border=True):
         if trop_d_aromes: st.error("Choisissez 2 arômes maximum.")
         
         st.write("")
-        amertume = st.select_slider("Amertume Cible", options=["Nulle", "Légère", "Moyenne", "Forte", "Extrême"])
+        amertume = st.select_slider("Amertume Ciblée", options=["Nulle", "Légère", "Moyenne", "Forte", "Extrême"])
         ibu_map = {"Nulle": 5, "Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
 
 st.write("")
 c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
-    if st.button("GÉNÉRER MA RECETTE", type="primary", use_container_width=True, disabled=trop_d_aromes):
+    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
         st.session_state.recette_generee = True
 
 # ==========================================
