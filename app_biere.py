@@ -24,137 +24,142 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS ARCHITECTURAL (CADRE EPAIS) ---
+# --- STYLE CSS ARCHITECTURAL & HARMONISÉ ---
 st.markdown("""
     <style>
     /* Import Police Artisanale "Rye" */
     @import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
+    /* Import Police Technique "Roboto" pour le corps */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
     :root {
         --couleur-fond-logo: #FCF6ED; 
         --primary-amber: #C27818;
-        --dark-slate: #2C3E50;
-        --text-dark: #222222;
+        --dark-brown: #2b2118; /* Marron très foncé remplaçant le gris */
+        --text-dark: #1a120b;
     }
 
-    /* 1. FOND DE PAGE & CADRE MASSIF */
+    /* 1. FOND DE PAGE */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        
-        /* LE CADRE MASSIF (60px) */
-        border: 60px solid var(--dark-slate); 
-        
-        /* Liseré interne Ambre */
-        box-shadow: inset 0 0 0 6px var(--primary-amber); 
-        
-        margin: 0px;
-    }
-    
-    /* Adaptation Mobile (Sinon le cadre mange tout l'écran sur téléphone) */
-    @media (max-width: 640px) {
-        .stApp {
-            border: 15px solid var(--dark-slate);
-            box-shadow: inset 0 0 0 3px var(--primary-amber); 
-        }
+        font-family: 'Roboto', sans-serif;
     }
 
-    /* 2. MODULES INTERNES (CADRES) */
+    /* 2. MODULES (CADRES) */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        border: 8px solid var(--dark-slate) !important;
-        box-shadow: inset 0 0 0 3px var(--primary-amber) !important;
-        border-radius: 6px;
-        background-color: rgba(255,255,255, 0.8) !important;
-        padding: 25px !important;
+        border: 6px solid var(--dark-brown) !important; /* Cadre plus épais */
+        box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
+        border-radius: 4px;
+        background-color: rgba(255,255,255, 0.85) !important;
+        padding: 20px !important;
         margin-bottom: 20px;
     }
 
-    /* TITRES */
+    /* TITRES HARMONISÉS */
     h1 {
         font-family: 'Rye', serif !important;
-        color: var(--dark-slate) !important; 
+        color: var(--dark-brown) !important; 
         text-transform: uppercase; 
         font-weight: 400;
-        letter-spacing: 2px;
+        letter-spacing: 1px;
         text-align: center !important;
-        font-size: 4rem !important;
-        margin-bottom: -15px !important;
+        font-size: 3rem !important; /* TAILLE RÉDUITE POUR TENIR SUR 2 LIGNES */
+        line-height: 1.2;
+        margin-bottom: -10px !important;
     }
     
     h2, h3 { 
-        color: var(--dark-slate) !important; 
+        font-family: 'Rye', serif !important;
+        color: var(--dark-brown) !important; 
         text-transform: uppercase; 
-        font-weight: 800; 
         letter-spacing: 1px;
     }
     
     /* SOUS-TITRES INTERNES */
     .subheader-text {
-        color: var(--primary-amber); font-weight: bold; font-size: 1.1em;
+        color: var(--primary-amber); font-weight: bold; font-size: 1.2em;
         margin-bottom: 15px; border-bottom: 3px solid var(--primary-amber);
         padding-bottom: 5px; display: inline-block; text-transform: uppercase;
+        font-family: 'Rye', serif;
     }
 
     /* BOUTONS GÉNÉRAUX */
     div.stButton > button {
         background-color: var(--primary-amber); color: white !important;
-        border: 3px solid var(--dark-slate);
+        border: 3px solid var(--dark-brown);
         border-radius: 4px; padding: 0.8rem 1.5rem;
-        font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
-        box-shadow: 4px 4px 0px var(--dark-slate);
-        font-size: 1.2rem;
+        font-family: 'Rye', serif; text-transform: uppercase; letter-spacing: 1.5px;
+        box-shadow: 4px 4px 0px var(--dark-brown);
+        font-size: 1.3rem;
         transition: all 0.2s;
     }
     div.stButton > button:hover {
         transform: translate(2px, 2px);
-        box-shadow: 2px 2px 0px var(--dark-slate);
+        box-shadow: 2px 2px 0px var(--dark-brown);
         background-color: #d35400;
     }
 
-    /* INPUTS VISIBILITÉ */
+    /* INPUTS VISIBILITÉ HARMONISÉE */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div,
     div[data-baseweb="base-input"] {
         background-color: #ffffff !important;
-        color: #000000 !important;
-        border: 2px solid #ccc;
-        border-radius: 0px;
+        color: var(--dark-brown) !important;
+        border: 2px solid #bcaaa4; /* Bordure marron clair */
+        border-radius: 4px;
     }
-    input[type="number"] { color: #000000 !important; font-weight: bold; }
+    input[type="number"] { color: var(--dark-brown) !important; font-weight: bold; }
     
     .stSelectbox label, .stNumberInput label, .stSlider label {
-        color: var(--dark-slate) !important; font-weight: 800;
+        color: var(--dark-brown) !important; 
+        font-weight: bold;
+        font-family: 'Roboto', sans-serif;
+        text-transform: uppercase;
     }
 
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- STYLE LISTE AROMES --- */
-    .aroma-row {
-        padding-top: 8px;
-        padding-bottom: 8px;
+    /* --- CADRE AROMES (FOND MARRON) --- */
+    .aroma-container {
+        background-color: var(--dark-brown);
+        border-radius: 8px;
+        padding: 15px;
+        border: 2px solid var(--primary-amber);
+    }
+    
+    .aroma-text {
+        color: #FCF6ED; /* Blanc cassé pour le contraste */
+        font-weight: bold;
+        font-size: 1rem;
+        font-family: 'Roboto', sans-serif;
+        padding-left: 10px;
+        display: flex;
+        align-items: center;
+        height: 100%;
     }
 
-    /* --- CUSTOMISATION DES TOGGLES (INTERRUPTEURS) --- */
+    /* --- CUSTOMISATION DES TOGGLES --- */
     div[data-baseweb="checkbox"] {
-        transform: scale(1.3); 
-        transform-origin: right center;
+        margin-top: 5px; /* Alignement vertical */
     }
+    /* Piste inactive (plus claire pour être visible sur fond marron) */
     div[data-baseweb="checkbox"] > div {
-        background-color: var(--dark-slate) !important;
+        background-color: #5d4037 !important; 
     }
+    /* Bouton (Blanc) */
     div[data-baseweb="checkbox"] > div > div {
         background-color: #ffffff !important;
-        box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
     }
+    /* Piste active (Ambre) */
     div[data-baseweb="checkbox"][aria-checked="true"] > div {
         background-color: var(--primary-amber) !important;
     }
     
     /* METRICS */
-    div[data-testid="stMetricLabel"] { color: var(--dark-slate); font-weight: 700; text-transform: uppercase;}
-    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; }
+    div[data-testid="stMetricLabel"] { color: var(--dark-brown); font-weight: 700; text-transform: uppercase;}
+    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; font-family: 'Rye', serif; }
     
     .block-container { padding-top: 1rem; padding-bottom: 5rem; }
     </style>
@@ -222,14 +227,13 @@ def create_pdf_compact(data):
 
 st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
 
-# LOGO PLUS PETIT ET RAPPROCHÉ
+# LOGO
 c1, c2, c3 = st.columns([2, 0.8, 2]) 
 with c2:
     try: st.image("logo.png", use_container_width=True)
     except: pass
 
-# SOUS-TITRE RAPPROCHÉ
-st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">LE GÉNÉRATEUR DE RECETTES DE BIÈRES</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; font-family: Rye; letter-spacing: 2px; text-transform: uppercase;">LE GÉNÉRATEUR DE RECETTES DE BIÈRES</p>', unsafe_allow_html=True)
 st.write("")
 
 # ==========================================
@@ -258,7 +262,6 @@ with st.container(border=True):
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
         
         st.write("")
-        st.write("")
         amertume = st.select_slider("Amertume Ciblée", options=["Nulle", "Légère", "Moyenne", "Forte", "Extrême"])
         ibu_map = {"Nulle": 5, "Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
@@ -275,16 +278,27 @@ with st.container(border=True):
         
         selected_aromas_list_full = []
         
-        # Boucle d'affichage des arômes
+        # CADRE MARRON POUR LES ARÔMES
+        st.markdown('<div class="aroma-container">', unsafe_allow_html=True)
+        
         for a in options_aromes_avec_emoji:
-            c_txt, c_tgl = st.columns([4, 1])
+            # Colonnes serrées pour coller le toggle à droite
+            # [ Texte (Large) | Toggle (Petit) ]
+            c_txt, c_tgl = st.columns([0.8, 0.2])
             is_on = st.session_state.get(f"toggle_{a}", False)
             should_disable = (active_count >= 2) and (not is_on)
             
-            c_txt.markdown(f"<div class='aroma-row' style='font-weight: bold; color: #2C3E50;'>{a}</div>", unsafe_allow_html=True)
+            with c_txt:
+                st.markdown(f"<p class='aroma-text'>{a}</p>", unsafe_allow_html=True)
             
-            if c_tgl.toggle("", key=f"toggle_{a}", disabled=should_disable):
-                selected_aromas_list_full.append(a)
+            with c_tgl:
+                if st.toggle("", key=f"toggle_{a}", disabled=should_disable):
+                    selected_aromas_list_full.append(a)
+            
+            # Petit espacement
+            st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
         if active_count >= 2:
             st.caption("🔒 *Max 2 arômes atteints.*")
