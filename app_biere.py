@@ -24,7 +24,7 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS ARCHITECTURAL & HARMONISÉ ---
+# --- STYLE CSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
@@ -118,16 +118,13 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- STYLE LISTE AROMES --- */
-    div[data-testid="column"] { padding: 0px !important; }
-    
-    .aroma-label {
-        font-weight: bold;
-        color: var(--dark-brown);
-        font-size: 1.1rem;
-        padding-top: 5px; 
+    /* --- ALIGNEMENT DES COLONNES SUR UNE LIGNE --- */
+    /* Force l'alignement vertical au centre pour les colonnes contenant texte et toggle */
+    [data-testid="column"] {
+        display: flex;
+        align-items: center; /* Centre verticalement */
+        justify-content: flex-start;
     }
-    .aroma-emoji { font-size: 1.5rem; }
 
     /* --- CUSTOM TOGGLES (MODIFIÉ POUR VISIBILITÉ) --- */
     div[data-baseweb="checkbox"] {
@@ -135,10 +132,10 @@ st.markdown("""
         margin-top: 0px !important;
     }
     
-    /* Piste inactive : MAINTENANT EN MARRON FONCÉ */
+    /* Piste inactive : NOIR PUR (#000000) */
     div[data-baseweb="checkbox"] > div {
-        background-color: var(--dark-brown) !important; 
-        border: 1px solid var(--primary-amber); /* Petit contour ambre */
+        background-color: #000000 !important; /* NOIR */
+        border: 1px solid #333; 
         height: 24px !important;
         width: 44px !important;
     }
@@ -278,19 +275,23 @@ with st.container(border=True):
         selected_aromas_list_full = []
         
         for a in options_aromes_avec_emoji:
-            c_icon, c_name, c_tgl = st.columns([0.15, 0.65, 0.2])
+            # 3 COLONNES STRICTES POUR ALIGNEMENT PARFAIT
+            # Emoji | Nom | Toggle (le CSS gère l'alignement vertical)
+            c_icon, c_name, c_tgl = st.columns([0.1, 0.6, 0.3])
+            
             is_on = st.session_state.get(f"toggle_{a}", False)
             should_disable = (active_count >= 2) and (not is_on)
             
             with c_icon:
-                st.markdown(f"<div class='aroma-emoji'>{a.split(' ')[0]}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-size:1.5rem; line-height:1.2;'>{a.split(' ')[0]}</div>", unsafe_allow_html=True)
             with c_name:
-                st.markdown(f"<div class='aroma-label'>{a.split(' ')[1]}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='font-weight:bold; color:#2b2118; font-size:1.1rem; line-height:1.5;'>{a.split(' ')[1]}</div>", unsafe_allow_html=True)
             with c_tgl:
+                # Toggle placé
                 if st.toggle("", key=f"toggle_{a}", disabled=should_disable):
                     selected_aromas_list_full.append(a)
             
-            st.markdown("<div style='margin-bottom: -15px;'></div>", unsafe_allow_html=True)
+            # Plus d'espace vide entre les lignes, le code CSS ci-dessus le gère
 
         st.write("") 
         if active_count >= 2:
