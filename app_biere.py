@@ -81,7 +81,7 @@ st.markdown("""
         font-family: 'Rye', serif;
     }
 
-    /* BOUTONS */
+    /* BOUTONS GENERAUX */
     div.stButton > button {
         background-color: var(--primary-amber); color: white !important;
         border: 3px solid var(--dark-brown);
@@ -118,42 +118,25 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- ALIGNEMENT DES COLONNES SUR UNE LIGNE --- */
-    /* Force l'alignement vertical au centre pour les colonnes contenant texte et toggle */
-    [data-testid="column"] {
-        display: flex;
-        align-items: center; /* Centre verticalement */
-        justify-content: flex-start;
+    /* --- STYLE DES BOUTONS PILLS (AROMES) --- */
+    
+    /* Bouton Inactif (Par défaut) */
+    span[data-baseweb="tag"] {
+        background-color: #ffffff !important; /* Blanc */
+        border: 2px solid var(--dark-brown) !important; /* Bordure Marron */
+        color: var(--dark-brown) !important; /* Texte Marron */
+        font-weight: bold !important;
+        font-size: 1rem !important;
+        padding: 8px 16px !important;
+    }
+    
+    /* Survol */
+    span[data-baseweb="tag"]:hover {
+        border-color: var(--primary-amber) !important;
+        cursor: pointer;
     }
 
-    /* --- CUSTOM TOGGLES (MODIFIÉ POUR VISIBILITÉ) --- */
-    div[data-baseweb="checkbox"] {
-        margin-bottom: 0px !important;
-        margin-top: 0px !important;
-    }
-    
-    /* Piste inactive : NOIR PUR (#000000) */
-    div[data-baseweb="checkbox"] > div {
-        background-color: #000000 !important; /* NOIR */
-        border: 1px solid #333; 
-        height: 24px !important;
-        width: 44px !important;
-    }
-    
-    /* Bouton (Rond) : BLANC */
-    div[data-baseweb="checkbox"] > div > div {
-        background-color: #ffffff !important;
-        height: 20px !important;
-        width: 20px !important;
-    }
-    
-    /* Piste active : AMBRE */
-    div[data-baseweb="checkbox"][aria-checked="true"] > div {
-        background-color: var(--primary-amber) !important;
-        border-color: var(--dark-brown);
-    }
-    
-    /* METRICS */
+    /* --- METRICS --- */
     div[data-testid="stMetricLabel"] { color: var(--dark-brown); font-weight: 700; text-transform: uppercase;}
     div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; font-family: 'Rye', serif; }
     
@@ -265,37 +248,19 @@ with st.container(border=True):
     with col2:
         st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES</p>', unsafe_allow_html=True)
         
-        options_aromes_avec_emoji = ["🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", "☕ Café", "🍫 Chocolat", "🍮 Caramel", "🍪 Biscuit", "🥓 Fumé", "🌶️ Épices", "🌸 Floral"]
+        options_aromes = ["🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", "☕ Café", "🍫 Chocolat", "🍮 Caramel", "🍪 Biscuit", "🥓 Fumé", "🌶️ Épices", "🌸 Floral"]
         
-        active_count = 0
-        for a in options_aromes_avec_emoji:
-            if st.session_state.get(f"toggle_{a}", False):
-                active_count += 1
+        # UTILISATION DE ST.PILLS (BOUTONS CLIQUABLES)
+        # selection_mode="multi" permet de sélectionner plusieurs
+        aromes_selectionnes = st.pills(
+            "Sélectionnez 2 arômes maximum :",
+            options_aromes,
+            selection_mode="multi"
+        )
         
-        selected_aromas_list_full = []
-        
-        for a in options_aromes_avec_emoji:
-            # 3 COLONNES STRICTES POUR ALIGNEMENT PARFAIT
-            # Emoji | Nom | Toggle (le CSS gère l'alignement vertical)
-            c_icon, c_name, c_tgl = st.columns([0.1, 0.6, 0.3])
-            
-            is_on = st.session_state.get(f"toggle_{a}", False)
-            should_disable = (active_count >= 2) and (not is_on)
-            
-            with c_icon:
-                st.markdown(f"<div style='font-size:1.5rem; line-height:1.2;'>{a.split(' ')[0]}</div>", unsafe_allow_html=True)
-            with c_name:
-                st.markdown(f"<div style='font-weight:bold; color:#2b2118; font-size:1.1rem; line-height:1.5;'>{a.split(' ')[1]}</div>", unsafe_allow_html=True)
-            with c_tgl:
-                # Toggle placé
-                if st.toggle("", key=f"toggle_{a}", disabled=should_disable):
-                    selected_aromas_list_full.append(a)
-            
-            # Plus d'espace vide entre les lignes, le code CSS ci-dessus le gère
-
-        st.write("") 
-        if active_count >= 2:
-            st.caption("🔒 *Max 2 arômes atteints.*")
+        trop_d_aromes = len(aromes_selectionnes) > 2
+        if trop_d_aromes:
+            st.error("⚠️ Trop d'arômes ! Veuillez en désélectionner pour n'en garder que 2.")
 
 # ==========================================
 # TRANSITION
@@ -310,7 +275,6 @@ st.write("")
 
 c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
-    trop_d_aromes = len(selected_aromas_list_full) > 2
     if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
         st.session_state.recette_generee = True
 
@@ -331,7 +295,7 @@ if st.session_state.recette_generee:
     elif style == "Saison": malt_base_nom="Pilsner"; malt_spe_nom="Munich"; levure="Belle Saison"
     elif style == "Lager": malt_base_nom="Pilsner"; malt_spe_nom="Vienna"; levure="W-34/70"
     
-    aromes_clean = [a.split(" ")[1] if " " in a else a for a in selected_aromas_list_full]
+    aromes_clean = [a.split(" ")[1] if " " in a else a for a in aromes_selectionnes]
     
     if "Biscuit" in aromes_clean: malt_spe_nom = "Biscuit"
     if "Fumé" in aromes_clean: malt_base_nom = "Fumé"
