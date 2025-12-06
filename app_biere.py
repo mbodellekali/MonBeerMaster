@@ -24,39 +24,33 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS AVEC CADRE ARTISTIQUE ---
+# --- STYLE CSS FINALISÉ (AVEC VOTRE COULEUR #FCF6ED) ---
 st.markdown("""
     <style>
+    /* --- PALETTE DE COULEURS --- */
     :root {
+        /* COULEUR EXACTE DE VOTRE LOGO (RGB 252, 246, 237) */
+        --couleur-fond-logo: #FCF6ED; 
+        
         --primary-amber: #C27818;
         --dark-slate: #2C3E50;
-        --bg-cream: #FDFBF7;
         --text-dark: #222222;
     }
 
-    /* --- CADRE ARTISTIQUE AUTOUR DE L'APPLI --- */
+    /* FOND GÉNÉRAL ET CADRE EXTERNE */
     .stApp {
-        background-color: var(--bg-cream);
+        background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         
-        /* Le Cadre "Double Border" */
-        border: 15px solid var(--dark-slate); /* Bordure extérieure industrielle */
-        box-shadow: inset 0 0 0 4px var(--primary-amber); /* Liseré intérieur Ambre */
-        margin: 10px; /* Petit espace avec le bord du navigateur */
-        border-radius: 8px; /* Coins légèrement adoucis */
+        /* Cadre Artistique Externe */
+        border: 15px solid var(--dark-slate);
+        box-shadow: inset 0 0 0 4px var(--primary-amber);
+        margin: 10px;
+        border-radius: 8px;
     }
 
-    /* Ajustement mobile pour ne pas perdre trop de place */
-    @media (max-width: 640px) {
-        .stApp {
-            border: 5px solid var(--dark-slate);
-            box-shadow: inset 0 0 0 2px var(--primary-amber);
-            margin: 0px;
-        }
-    }
-
-    /* --- RESTE DU DESIGN --- */
+    /* TITRES */
     h1, h2, h3 {
         color: var(--dark-slate) !important;
         text-transform: uppercase;
@@ -64,61 +58,83 @@ st.markdown("""
         font-weight: 700;
     }
     
+    /* SOUS-TITRES DANS L'APP */
     .subheader-text {
         color: var(--primary-amber);
         font-weight: bold;
         font-size: 1.1em;
-        margin-bottom: 10px;
-        border-bottom: 2px solid #eee;
+        margin-bottom: 15px;
+        border-bottom: 2px solid var(--primary-amber);
         padding-bottom: 5px;
+        display: inline-block;
     }
 
+    /* BOUTONS */
     div.stButton > button {
         background-color: var(--primary-amber);
         color: white !important;
         border: none;
         border-radius: 4px;
-        padding: 0.6rem 1.2rem;
+        padding: 0.8rem 1.5rem;
         font-weight: bold;
         text-transform: uppercase;
         letter-spacing: 1px;
         transition: background-color 0.3s;
         box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        font-size: 1.1rem;
     }
     div.stButton > button:hover {
         background-color: var(--dark-slate);
     }
 
+    /* --- CORRECTION VISIBILITÉ INPUTS --- */
+    /* Force le fond blanc et le texte foncé pour les champs de saisie */
     .stSelectbox div[data-baseweb="select"] > div,
-    .stNumberInput div[data-baseweb="input"] > div {
-        background-color: white !important;
-        color: var(--text-dark) !important;
+    .stNumberInput div[data-baseweb="input"] > div,
+    div[data-baseweb="base-input"] {
+        background-color: #ffffff !important;
+        color: var(--dark-slate) !important;
         border: 1px solid #cccccc;
         border-radius: 4px;
     }
+    /* Force la couleur du texte tapé dans les inputs numériques */
+    input[type="number"] {
+         color: var(--dark-slate) !important;
+    }
     
+    /* Labels des inputs */
     .stSelectbox label, .stNumberInput label, .stSlider label, .stPills label {
         color: var(--dark-slate) !important;
-        font-weight: 600;
+        font-weight: 700;
     }
 
+    /* Curseur des sliders */
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
+    /* PILLS (Tags arômes) */
     span[data-baseweb="tag"] {
-        background-color: #F0E4D3 !important;
-        border: 1px solid var(--primary-amber) !important;
+        background-color: #ffffff !important;
+        border: 2px solid var(--primary-amber) !important;
         color: var(--dark-slate) !important;
+        font-weight: 600;
     }
     
-    div[data-testid="stMetricLabel"] { color: var(--dark-slate); font-size: 0.9em; }
-    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 700; }
-    
-    /* Suppression du padding haut excessif de Streamlit */
-    .block-container {
-        padding-top: 2rem;
-        padding-bottom: 5rem;
+    /* --- CADRES ARTISTIQUES INTERNES --- */
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        border: 4px solid var(--dark-slate) !important;
+        box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
+        border-radius: 8px;
+        background-color: rgba(255,255,255, 0.4); /* Transparence légère pour fondre avec le fond */
+        padding: 20px !important;
     }
+    
+    /* METRICS */
+    div[data-testid="stMetricLabel"] { color: var(--dark-slate); font-size: 0.9em; font-weight: 600;}
+    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; }
+    
+    .block-container { padding-top: 2rem; padding-bottom: 5rem; }
+    hr { margin: 3rem 0; border-color: var(--dark-slate); opacity: 0.2; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -208,7 +224,7 @@ with c_logo2:
     except: pass
 
 st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
-st.markdown('<p style="text-align: center; color: #7f8c8d; margin-top: -15px; font-weight: bold; letter-spacing: 1px;">UNITÉ DE PRODUCTION</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">le générateur de recettes de bières</p>', unsafe_allow_html=True)
 st.write("")
 
 # ==========================================
@@ -216,7 +232,7 @@ st.write("")
 # ==========================================
 
 with st.container(border=True):
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns(2, gap="large")
     
     with col1:
         st.markdown('<p class="subheader-text">1. TYPE DE BIÈRE</p>', unsafe_allow_html=True)
@@ -237,7 +253,7 @@ with st.container(border=True):
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
 
     with col2:
-        st.markdown('<p class="subheader-text">2. CARACTÈRE</p>', unsafe_allow_html=True)
+        st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES</p>', unsafe_allow_html=True)
         options_aromes = ["🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", "☕ Café", "🍫 Chocolat", "🍮 Caramel", "🍪 Biscuit", "🥓 Fumé", "🌶️ Épices", "🌸 Floral"]
         aromes_selectionnes = st.pills("Arômes (Max 2)", options_aromes, selection_mode="multi")
         
@@ -252,7 +268,7 @@ with st.container(border=True):
 st.write("")
 c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
-    if st.button("LANCER LE CALCUL", type="primary", use_container_width=True, disabled=trop_d_aromes):
+    if st.button("GÉNÉRER MA RECETTE", type="primary", use_container_width=True, disabled=trop_d_aromes):
         st.session_state.recette_generee = True
 
 # ==========================================
@@ -304,7 +320,7 @@ if st.session_state.recette_generee:
     if aromes_clean: st.caption(f"<p style='text-align: center;'>Notes : {', '.join(aromes_clean)}</p>", unsafe_allow_html=True)
     st.write("")
 
-    col_res1, col_res2 = st.columns([2, 1.5])
+    col_res1, col_res2 = st.columns([2, 1.5], gap="large")
     
     with col_res1:
         with st.container(border=True):
