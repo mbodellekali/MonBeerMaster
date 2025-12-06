@@ -24,7 +24,7 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS ---
+# --- STYLE CSS CORRECTIF & ARCHITECTURAL ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
@@ -37,13 +37,27 @@ st.markdown("""
         --text-dark: #1a120b;
     }
 
+    /* 1. CADRE EXTERIEUR MASSIF (FIXÉ) */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: 'Roboto', sans-serif;
+        
+        /* Force le cadre, padding pour éviter que le contenu touche le cadre */
+        border: 50px solid var(--dark-brown);
+        box-shadow: inset 0 0 0 5px var(--primary-amber);
+        padding: 20px; 
+    }
+    
+    /* Adaptation mobile : on réduit le cadre sinon c'est illisible */
+    @media (max-width: 640px) {
+        .stApp {
+            border: 15px solid var(--dark-brown);
+            padding: 5px;
+        }
     }
 
-    /* MODULES (CADRES) */
+    /* 2. MODULES INTERNES (CADRES) */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
         border: 6px solid var(--dark-brown) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
@@ -118,25 +132,40 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- STYLE DES BOUTONS PILLS (AROMES) --- */
+    /* --- CORRECTION CRITIQUE ST.PILLS (AROMES) --- */
     
-    /* Bouton Inactif (Par défaut) */
-    span[data-baseweb="tag"] {
+    /* 1. État par défaut (Non sélectionné) */
+    [data-testid="stPills"] button {
         background-color: #ffffff !important; /* Blanc */
-        border: 2px solid var(--dark-brown) !important; /* Bordure Marron */
-        color: var(--dark-brown) !important; /* Texte Marron */
-        font-weight: bold !important;
-        font-size: 1rem !important;
-        padding: 8px 16px !important;
+        border: 2px solid var(--dark-brown) !important;
+        transition: all 0.2s;
     }
     
-    /* Survol */
-    span[data-baseweb="tag"]:hover {
+    /* Texte par défaut */
+    [data-testid="stPills"] button p {
+        color: var(--dark-brown) !important; /* Marron foncé */
+        font-weight: 700 !important;
+        font-family: 'Roboto', sans-serif;
+    }
+    
+    /* 2. État SÉLECTIONNÉ */
+    [data-testid="stPills"] button[aria-selected="true"] {
+        background-color: var(--primary-amber) !important; /* Ambre */
+        border-color: var(--dark-brown) !important;
+    }
+    
+    /* Texte quand sélectionné */
+    [data-testid="stPills"] button[aria-selected="true"] p {
+        color: #ffffff !important; /* Blanc */
+    }
+    
+    /* 3. Survol */
+    [data-testid="stPills"] button:hover {
         border-color: var(--primary-amber) !important;
-        cursor: pointer;
+        transform: scale(1.02);
     }
 
-    /* --- METRICS --- */
+    /* METRICS */
     div[data-testid="stMetricLabel"] { color: var(--dark-brown); font-weight: 700; text-transform: uppercase;}
     div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; font-family: 'Rye', serif; }
     
