@@ -27,28 +27,25 @@ HOPS_DB = {
 # --- STYLE CSS ARCHITECTURAL & HARMONISÉ ---
 st.markdown("""
     <style>
-    /* Import Police Artisanale "Rye" */
     @import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
-    /* Import Police Technique "Roboto" pour le corps */
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
     :root {
         --couleur-fond-logo: #FCF6ED; 
         --primary-amber: #C27818;
-        --dark-brown: #2b2118; /* Marron très foncé remplaçant le gris */
+        --dark-brown: #2b2118;
         --text-dark: #1a120b;
     }
 
-    /* 1. FOND DE PAGE */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: 'Roboto', sans-serif;
     }
 
-    /* 2. MODULES (CADRES) */
+    /* MODULES (CADRES) */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        border: 6px solid var(--dark-brown) !important; /* Cadre plus épais */
+        border: 6px solid var(--dark-brown) !important;
         box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
         border-radius: 4px;
         background-color: rgba(255,255,255, 0.85) !important;
@@ -56,7 +53,7 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    /* TITRES HARMONISÉS */
+    /* TITRES */
     h1 {
         font-family: 'Rye', serif !important;
         color: var(--dark-brown) !important; 
@@ -64,8 +61,8 @@ st.markdown("""
         font-weight: 400;
         letter-spacing: 1px;
         text-align: center !important;
-        font-size: 3rem !important; /* TAILLE RÉDUITE POUR TENIR SUR 2 LIGNES */
-        line-height: 1.2;
+        font-size: 3rem !important; /* Taille réduite */
+        line-height: 1.1;
         margin-bottom: -10px !important;
     }
     
@@ -76,7 +73,7 @@ st.markdown("""
         letter-spacing: 1px;
     }
     
-    /* SOUS-TITRES INTERNES */
+    /* SOUS-TITRES */
     .subheader-text {
         color: var(--primary-amber); font-weight: bold; font-size: 1.2em;
         margin-bottom: 15px; border-bottom: 3px solid var(--primary-amber);
@@ -84,7 +81,7 @@ st.markdown("""
         font-family: 'Rye', serif;
     }
 
-    /* BOUTONS GÉNÉRAUX */
+    /* BOUTONS */
     div.stButton > button {
         background-color: var(--primary-amber); color: white !important;
         border: 3px solid var(--dark-brown);
@@ -100,13 +97,13 @@ st.markdown("""
         background-color: #d35400;
     }
 
-    /* INPUTS VISIBILITÉ HARMONISÉE */
+    /* INPUTS */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div,
     div[data-baseweb="base-input"] {
         background-color: #ffffff !important;
         color: var(--dark-brown) !important;
-        border: 2px solid #bcaaa4; /* Bordure marron clair */
+        border: 2px solid #bcaaa4;
         border-radius: 4px;
     }
     input[type="number"] { color: var(--dark-brown) !important; font-weight: bold; }
@@ -121,38 +118,43 @@ st.markdown("""
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
     div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- CADRE AROMES (FOND MARRON) --- */
-    .aroma-container {
-        background-color: var(--dark-brown);
-        border-radius: 8px;
-        padding: 15px;
-        border: 2px solid var(--primary-amber);
+    /* --- CSS SPÉCIFIQUE LISTE AROMES COMPACTE --- */
+    
+    /* Réduction des marges entre les colonnes de Streamlit pour cette section */
+    div[data-testid="column"] {
+        padding: 0px !important;
     }
     
-    .aroma-text {
-        color: #FCF6ED; /* Blanc cassé pour le contraste */
+    /* Style du texte des arômes */
+    .aroma-label {
         font-weight: bold;
-        font-size: 1rem;
-        font-family: 'Roboto', sans-serif;
-        padding-left: 10px;
-        display: flex;
-        align-items: center;
-        height: 100%;
+        color: var(--dark-brown);
+        font-size: 1.1rem;
+        padding-top: 5px; /* Alignement avec le toggle */
+    }
+    
+    .aroma-emoji {
+        font-size: 1.5rem;
     }
 
-    /* --- CUSTOMISATION DES TOGGLES --- */
+    /* CUSTOM TOGGLES (Interrupteurs) */
     div[data-baseweb="checkbox"] {
-        margin-top: 5px; /* Alignement vertical */
+        margin-bottom: 0px !important;
+        margin-top: 0px !important;
     }
-    /* Piste inactive (plus claire pour être visible sur fond marron) */
+    /* Piste inactive */
     div[data-baseweb="checkbox"] > div {
-        background-color: #5d4037 !important; 
+        background-color: #5d4037 !important; /* Marron visible */
+        height: 24px !important;
+        width: 44px !important;
     }
-    /* Bouton (Blanc) */
+    /* Bouton */
     div[data-baseweb="checkbox"] > div > div {
         background-color: #ffffff !important;
+        height: 20px !important;
+        width: 20px !important;
     }
-    /* Piste active (Ambre) */
+    /* Piste active */
     div[data-baseweb="checkbox"][aria-checked="true"] > div {
         background-color: var(--primary-amber) !important;
     }
@@ -222,12 +224,11 @@ def create_pdf_compact(data):
     return pdf.output(dest='S').encode('latin-1')
 
 # ==========================================
-# HEADER COMPACTÉ
+# HEADER
 # ==========================================
 
 st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
 
-# LOGO
 c1, c2, c3 = st.columns([2, 0.8, 2]) 
 with c2:
     try: st.image("logo.png", use_container_width=True)
@@ -237,7 +238,7 @@ st.markdown('<p style="text-align: center; color: #C27818; margin-top: -15px; fo
 st.write("")
 
 # ==========================================
-# MODULE 1 : CONFIGURATION
+# CONFIGURATION
 # ==========================================
 
 with st.container(border=True): 
@@ -262,6 +263,7 @@ with st.container(border=True):
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
         
         st.write("")
+        st.write("")
         amertume = st.select_slider("Amertume Ciblée", options=["Nulle", "Légère", "Moyenne", "Forte", "Extrême"])
         ibu_map = {"Nulle": 5, "Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
@@ -278,28 +280,32 @@ with st.container(border=True):
         
         selected_aromas_list_full = []
         
-        # CADRE MARRON POUR LES ARÔMES
-        st.markdown('<div class="aroma-container">', unsafe_allow_html=True)
-        
+        # LISTE COMPACTE ET SERRÉE
+        # On évite les conteneurs Streamlit pour réduire les marges, on fait du direct
         for a in options_aromes_avec_emoji:
-            # Colonnes serrées pour coller le toggle à droite
-            # [ Texte (Large) | Toggle (Petit) ]
-            c_txt, c_tgl = st.columns([0.8, 0.2])
+            # Séparation Emoji / Nom
+            emoji = a.split(" ")[0]
+            nom = a.split(" ")[1]
+            
+            # Colonnes: [Emoji] [Nom] [Toggle (Aligné à droite)]
+            # On utilise des ratios précis pour que tout soit aligné
+            c_icon, c_name, c_tgl = st.columns([0.15, 0.65, 0.2])
+            
             is_on = st.session_state.get(f"toggle_{a}", False)
             should_disable = (active_count >= 2) and (not is_on)
             
-            with c_txt:
-                st.markdown(f"<p class='aroma-text'>{a}</p>", unsafe_allow_html=True)
-            
+            with c_icon:
+                st.markdown(f"<div class='aroma-emoji'>{emoji}</div>", unsafe_allow_html=True)
+            with c_name:
+                st.markdown(f"<div class='aroma-label'>{nom}</div>", unsafe_allow_html=True)
             with c_tgl:
                 if st.toggle("", key=f"toggle_{a}", disabled=should_disable):
                     selected_aromas_list_full.append(a)
             
-            # Petit espacement
-            st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
+            # Espacement vertical minime manuel pour serrer les lignes
+            st.markdown("<div style='margin-bottom: -15px;'></div>", unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
+        st.write("") # Petit espace après la liste
         if active_count >= 2:
             st.caption("🔒 *Max 2 arômes atteints.*")
 
