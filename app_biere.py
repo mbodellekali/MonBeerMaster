@@ -24,10 +24,12 @@ HOPS_DB = {
     "Fuggles": {"aa": 4.5}, "Cascade": {"aa": 6.0}, "Tettnanger": {"aa": 4.0}
 }
 
-# --- STYLE CSS CORRECTIF ---
+# --- STYLE CSS ARCHITECTURAL ---
 st.markdown("""
     <style>
-    /* --- PALETTE --- */
+    /* Import Police Artisanale "Rye" */
+    @import url('https://fonts.googleapis.com/css2?family=Rye&display=swap');
+
     :root {
         --couleur-fond-logo: #FCF6ED; 
         --primary-amber: #C27818;
@@ -35,104 +37,94 @@ st.markdown("""
         --text-dark: #222222;
     }
 
-    /* FOND APP */
+    /* 1. FOND DE PAGE */
     .stApp {
         background-color: var(--couleur-fond-logo);
         color: var(--text-dark);
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-        border: 15px solid var(--dark-slate);
-        box-shadow: inset 0 0 0 4px var(--primary-amber);
-        margin: 10px;
-        border-radius: 8px;
+    }
+
+    /* 2. MODULES (CADRES) */
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        border: 8px solid var(--dark-slate) !important;
+        box-shadow: inset 0 0 0 3px var(--primary-amber) !important;
+        border-radius: 6px;
+        background-color: rgba(255,255,255, 0.8) !important;
+        padding: 25px !important;
+        margin-bottom: 20px;
     }
 
     /* TITRES */
-    h1, h2, h3 { color: var(--dark-slate) !important; text-transform: uppercase; font-weight: 700; }
+    h1 {
+        font-family: 'Rye', serif !important; /* Police Artisanale */
+        color: var(--dark-slate) !important; 
+        text-transform: uppercase; 
+        font-weight: 400; /* Rye est déjà gras par nature */
+        letter-spacing: 2px;
+        text-align: center !important; /* Centrage forcé */
+        font-size: 4rem !important;
+    }
     
-    /* SOUS-TITRES */
+    h2, h3 { 
+        color: var(--dark-slate) !important; 
+        text-transform: uppercase; 
+        font-weight: 800; 
+        letter-spacing: 1px;
+    }
+    
+    /* SOUS-TITRES INTERNES */
     .subheader-text {
         color: var(--primary-amber); font-weight: bold; font-size: 1.1em;
-        margin-bottom: 15px; border-bottom: 2px solid var(--primary-amber);
-        padding-bottom: 5px; display: inline-block;
+        margin-bottom: 15px; border-bottom: 3px solid var(--primary-amber);
+        padding-bottom: 5px; display: inline-block; text-transform: uppercase;
     }
 
-    /* BOUTONS D'ACTION */
+    /* BOUTONS */
     div.stButton > button {
         background-color: var(--primary-amber); color: white !important;
-        border: none; border-radius: 4px; padding: 0.8rem 1.5rem;
-        font-weight: bold; text-transform: uppercase; letter-spacing: 1px;
-        box-shadow: 2px 2px 5px rgba(0,0,0,0.2); font-size: 1.1rem;
+        border: 3px solid var(--dark-slate);
+        border-radius: 4px; padding: 0.8rem 1.5rem;
+        font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+        box-shadow: 4px 4px 0px var(--dark-slate);
+        font-size: 1.2rem;
+        transition: all 0.2s;
     }
-    div.stButton > button:hover { background-color: var(--dark-slate); }
+    div.stButton > button:hover {
+        transform: translate(2px, 2px);
+        box-shadow: 2px 2px 0px var(--dark-slate);
+        background-color: #d35400;
+    }
 
-    /* INPUTS (Selectbox, NumberInput) - Force fond blanc et texte noir */
+    /* INPUTS VISIBILITÉ */
     .stSelectbox div[data-baseweb="select"] > div,
     .stNumberInput div[data-baseweb="input"] > div,
     div[data-baseweb="base-input"] {
         background-color: #ffffff !important;
         color: #000000 !important;
-        border: 1px solid #cccccc;
+        border: 2px solid #ccc;
+        border-radius: 0px;
     }
-    /* Couleur du texte dans les inputs */
-    input[type="number"], div[data-baseweb="select"] span {
-         color: #000000 !important;
-         -webkit-text-fill-color: #000000 !important;
-    }
+    input[type="number"] { color: #000000 !important; font-weight: bold; }
     
-    /* LABELS */
-    .stSelectbox label, .stNumberInput label, .stSlider label, .stPills label {
-        color: var(--dark-slate) !important; font-weight: 700;
+    .stSelectbox label, .stNumberInput label, .stSlider label {
+        color: var(--dark-slate) !important; font-weight: 800;
     }
 
-    /* --- CORRECTION CRITIQUE : ARÔMES (PILLS) --- */
-    /* Force le fond blanc et bordure ambre pour les options non sélectionnées */
-    div[data-baseweb="select"] span[role="listbox"] {
-        background-color: white !important;
-    }
-    
-    /* Ciblage spécifique des pills Streamlit */
-    div[data-testid="stPills"] button {
-        background-color: #ffffff !important;
-        border: 1px solid var(--primary-amber) !important;
-    }
-    
-    /* Force le texte en noir à l'intérieur des pills */
-    div[data-testid="stPills"] button p {
-        color: #000000 !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Changement au survol ou sélection (optionnel, Streamlit gère le selected) */
-    div[data-testid="stPills"] button:hover {
-        border-color: var(--dark-slate) !important;
-    }
+    div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
+    div[data-baseweb="slider"] > div > div > div { background-color: var(--primary-amber) !important; }
 
-    /* --- CORRECTION CRITIQUE : VISIBILITÉ RESULTATS --- */
-    /* Augmentation de l'opacité du fond des cartes (0.9 au lieu de 0.4) */
-    div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        border: 4px solid var(--dark-slate) !important;
-        box-shadow: inset 0 0 0 2px var(--primary-amber) !important;
-        border-radius: 8px;
-        background-color: rgba(255,255,255, 0.95) !important; /* Quasi opaque pour lisibilité */
-        padding: 20px !important;
+    /* STYLE LISTE IPHONE (Custom Toggle Container) */
+    .aroma-row {
+        border-bottom: 1px solid #ddd;
+        padding-top: 5px;
+        padding-bottom: 5px;
     }
     
-    /* METRICS (Processus) - Force les couleurs */
-    div[data-testid="stMetricLabel"] { 
-        color: var(--dark-slate) !important; 
-        font-size: 1em !important; 
-        font-weight: 700 !important;
-    }
-    div[data-testid="stMetricValue"] { 
-        color: var(--primary-amber) !important; 
-        font-weight: 800 !important; 
-    }
-    div[data-testid="stMetricDelta"] {
-        color: var(--dark-slate) !important;
-    }
+    /* METRICS */
+    div[data-testid="stMetricLabel"] { color: var(--dark-slate); font-weight: 700; text-transform: uppercase;}
+    div[data-testid="stMetricValue"] { color: var(--primary-amber); font-weight: 800; font-size: 1.8rem; }
     
     .block-container { padding-top: 2rem; padding-bottom: 5rem; }
-    hr { margin: 3rem 0; border-color: var(--dark-slate); opacity: 0.2; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -165,56 +157,35 @@ class PDF(FPDF):
 
 def create_pdf_compact(data):
     pdf = PDF(); pdf.add_page(); pdf.set_auto_page_break(auto=True, margin=10)
-    
-    pdf.set_font("Arial", 'B', 14)
-    pdf.cell(0, 8, f"Fiche de Production : {data['style'].upper()}", ln=True, align='C')
+    pdf.set_font("Arial", 'B', 14); pdf.cell(0, 8, f"Fiche de Production : {data['style'].upper()}", ln=True, align='C')
     pdf.set_font("Arial", 'I', 11)
     aromes_txt = ", ".join(data['aromes']).encode('latin-1', 'replace').decode('latin-1')
-    pdf.cell(0, 6, f"Profil : {aromes_txt}", ln=True, align='C')
-    pdf.ln(5)
-
-    pdf.set_fill_color(230, 230, 230)
-    pdf.set_font("Arial", 'B', 10)
+    pdf.cell(0, 6, f"Profil : {aromes_txt}", ln=True, align='C'); pdf.ln(5)
+    pdf.set_fill_color(230, 230, 230); pdf.set_font("Arial", 'B', 10)
     info_str = f"Vol: {data['volume']}L | ABV: {data['abv']}% | OG: {data['og']:.3f} | IBU: {int(data['ibu'])} | EBC: {int(data['ebc'])} | Eff: {int(data['eff']*100)}%"
-    pdf.cell(0, 10, info_str, 1, 1, 'C', fill=True)
-    pdf.ln(8)
-
-    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "1. Grains & Fermentescibles", ln=True)
-    pdf.set_font("Arial", '', 10)
-    h_line = 7
-    pdf.set_fill_color(245, 245, 245)
+    pdf.cell(0, 10, info_str, 1, 1, 'C', fill=True); pdf.ln(8)
+    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "1. Grains & Fermentescibles", ln=True); pdf.set_font("Arial", '', 10)
+    h_line = 7; pdf.set_fill_color(245, 245, 245)
     pdf.cell(25, h_line, "Poids", 1, 0, 'C', True); pdf.cell(140, h_line, "Malt", 1, 0, 'L', True); pdf.cell(25, h_line, "%", 1, 1, 'C', True)
     total_grain = 0
     for grain in data['grains']:
-        pdf.cell(25, h_line, f"{grain['poids']} kg", 1, 0, 'C')
-        nom_grain = grain['nom'].encode('latin-1', 'replace').decode('latin-1')
-        pdf.cell(140, h_line, f" {nom_grain}", 1, 0, 'L')
-        pdf.cell(25, h_line, f"{grain['ratio']*100:.0f} %", 1, 1, 'C')
-        total_grain += grain['poids']
+        pdf.cell(25, h_line, f"{grain['poids']} kg", 1, 0, 'C'); nom_grain = grain['nom'].encode('latin-1', 'replace').decode('latin-1')
+        pdf.cell(140, h_line, f" {nom_grain}", 1, 0, 'L'); pdf.cell(25, h_line, f"{grain['ratio']*100:.0f} %", 1, 1, 'C'); total_grain += grain['poids']
     pdf.set_font("Arial", 'B', 10); pdf.cell(165, h_line, f"Total : {total_grain:.2f} kg", 0, 1, 'R'); pdf.ln(8)
-
-    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "2. Houblonnage", ln=True)
-    pdf.set_font("Arial", '', 10)
+    pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "2. Houblonnage", ln=True); pdf.set_font("Arial", '', 10)
     pdf.cell(25, h_line, "Poids", 1, 0, 'C', True); pdf.cell(60, h_line, "Variete", 1, 0, 'L', True); pdf.cell(60, h_line, "Usage", 1, 0, 'L', True); pdf.cell(45, h_line, "AA%", 1, 1, 'C', True)
     for hop in data['houblons']:
-        pdf.cell(25, h_line, f"{hop['poids']} g", 1, 0, 'C')
-        pdf.cell(60, h_line, f" {hop['nom']}", 1, 0, 'L')
-        pdf.cell(60, h_line, f" {hop['usage']}", 1, 0, 'L')
-        pdf.cell(45, h_line, f"{hop['aa']} %", 1, 1, 'C')
+        pdf.cell(25, h_line, f"{hop['poids']} g", 1, 0, 'C'); pdf.cell(60, h_line, f" {hop['nom']}", 1, 0, 'L'); pdf.cell(60, h_line, f" {hop['usage']}", 1, 0, 'L'); pdf.cell(45, h_line, f"{hop['aa']} %", 1, 1, 'C')
     pdf.ln(8)
-
     pdf.set_font("Arial", 'B', 12); pdf.cell(0, 8, "3. Processus", ln=True); pdf.set_font("Arial", '', 10)
-    pdf.cell(95, 8, f"Empatage: {data['eau_emp']:.1f} L (67 C - 60min)", 1)
-    pdf.cell(95, 8, f"Rincage: {data['eau_rinc']:.1f} L (75 C)", 1, 1)
-    pdf.cell(95, 8, f"Ebullition: 60 min (100 C)", 1)
-    pdf.cell(95, 8, f"Fermentation: ~15 jours (20 C)", 1, 1)
-    pdf.ln(8)
+    pdf.cell(95, 8, f"Empatage: {data['eau_emp']:.1f} L (67 C - 60min)", 1); pdf.cell(95, 8, f"Rincage: {data['eau_rinc']:.1f} L (75 C)", 1, 1)
+    pdf.cell(95, 8, f"Ebullition: 60 min (100 C)", 1); pdf.cell(95, 8, f"Fermentation: ~15 jours (20 C)", 1, 1); pdf.ln(8)
     pdf.set_font("Arial", 'B', 10); pdf.cell(0, 8, f"Levure : {data['levure']}", 0, 1, 'L')
     pdf.set_y(-15); pdf.set_font("Arial", 'I', 8); pdf.cell(0, 10, "Systeme Beer Factory", 0, 0, 'C')
     return pdf.output(dest='S').encode('latin-1')
 
 # ==========================================
-# HEADER RESTRUCTURÉ
+# HEADER
 # ==========================================
 
 st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_html=True)
@@ -222,20 +193,18 @@ st.markdown('<h1 style="text-align: center;">BEER FACTORY</h1>', unsafe_allow_ht
 # LOGO (CENTRÉ)
 c1, c2, c3 = st.columns([1.5, 1, 1.5])
 with c2:
-    try:
-        st.image("logo.png", use_container_width=True)
-    except:
-        pass
+    try: st.image("logo.png", use_container_width=True)
+    except: pass
 
-st.markdown('<p style="text-align: center; color: #C27818; margin-top: 10px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;">le générateur de recettes de bières</p>', unsafe_allow_html=True)
+st.markdown('<p style="text-align: center; color: #C27818; margin-top: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;">LE GÉNÉRATEUR DE RECETTES DE BIÈRES</p>', unsafe_allow_html=True)
 st.write("")
 
 # ==========================================
-# CONFIGURATION
+# MODULE 1 : CONFIGURATION (ENCADRÉ)
 # ==========================================
 
-with st.container(border=True):
-    col1, col2 = st.columns(2, gap="large")
+with st.container(border=True): # Cadre visuel 1
+    col1, col2 = st.columns([1, 1], gap="large")
     
     with col1:
         st.markdown('<p class="subheader-text">1. TYPE DE BIÈRE</p>', unsafe_allow_html=True)
@@ -254,54 +223,89 @@ with st.container(border=True):
         c_v, c_a = st.columns(2)
         volume = c_v.number_input("Volume (L)", 5, 100, 20)
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
-
-    with col2:
-        st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES</p>', unsafe_allow_html=True)
-        options_aromes = ["🍊 Agrumes", "🥭 Tropical", "🌲 Pin", "🍌 Banane", "☕ Café", "🍫 Chocolat", "🍮 Caramel", "🍪 Biscuit", "🥓 Fumé", "🌶️ Épices", "🌸 Floral"]
-        aromes_selectionnes = st.pills("Arômes (Max 2)", options_aromes, selection_mode="multi")
         
-        trop_d_aromes = len(aromes_selectionnes) > 2
-        if trop_d_aromes: st.error("Choisissez 2 arômes maximum.")
-        
+        st.write("")
         st.write("")
         amertume = st.select_slider("Amertume Ciblée", options=["Nulle", "Légère", "Moyenne", "Forte", "Extrême"])
         ibu_map = {"Nulle": 5, "Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
 
-st.write("")
-c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
-with c_b2:
-    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True, disabled=trop_d_aromes):
-        st.session_state.recette_generee = True
+    with col2:
+        st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES</p>', unsafe_allow_html=True)
+        
+        options_aromes = ["Agrumes", "Tropical", "Pin", "Banane", "Café", "Chocolat", "Caramel", "Biscuit", "Fumé", "Épices", "Floral"]
+        
+        # LOGIQUE DE COMPTAGE POUR LA LIMITATION
+        # On compte combien sont actifs actuellement
+        active_count = 0
+        for a in options_aromes:
+            if st.session_state.get(f"toggle_{a}", False):
+                active_count += 1
+        
+        selected_aromas_list = []
+        
+        # LISTE "STYLE IPHONE"
+        # On utilise une boucle pour créer les lignes
+        for a in options_aromes:
+            # Layout : Colonne Texte (gauche) | Colonne Toggle (droite)
+            c_txt, c_tgl = st.columns([4, 1])
+            
+            # État actuel de ce toggle
+            is_on = st.session_state.get(f"toggle_{a}", False)
+            
+            # Est-ce qu'on doit le désactiver ? 
+            # OUI si (on a déjà 2 actifs) ET (celui-ci n'est pas actif)
+            should_disable = (active_count >= 2) and (not is_on)
+            
+            # Affichage du texte
+            c_txt.markdown(f"<div style='padding-top: 10px; font-weight: bold; color: #2C3E50;'>{a}</div>", unsafe_allow_html=True)
+            
+            # Affichage du Toggle
+            if c_tgl.toggle("", key=f"toggle_{a}", disabled=should_disable):
+                selected_aromas_list.append(a)
+            
+            # Petit trait de séparation comme sur iPhone
+            st.markdown("<hr style='margin: 0px; border-color: #ddd; opacity: 0.5;'>", unsafe_allow_html=True)
 
+        if active_count >= 2:
+            st.caption("🔒 *Max 2 arômes atteints. Décochez-en un pour changer.*")
+
+# ==========================================
+# ZONE DE TRANSITION (FRISE + BOUTON)
+# ==========================================
 st.write("")
 try:
     st.image("frise.png", use_container_width=True)
-except Exception:
-    st.write("") 
+except:
+    st.markdown("---") 
+
+st.write("")
+
+c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
+with c_b2:
+    if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True):
+        st.session_state.recette_generee = True
+
 st.write("")
 
 # ==========================================
-# RÉSULTATS
+# MODULE 2 : RÉSULTATS (ENCADRÉ SÉPARÉ)
 # ==========================================
 
 if st.session_state.recette_generee:
-    st.divider()
     
+    # CALCULS
     efficacite = 0.75 
-
-    malt_base_nom = "Pilsner"; malt_spe_nom = "Blé (Froment)"; levure = "US-05 (Neutre)"
-    houblon_amer = "Magnum"; houblon_arome = "Saaz"
-    ratio_base = 0.90; ratio_spe = 0.10
-    
+    malt_base_nom = "Pilsner"; malt_spe_nom = "Blé (Froment)"; levure = "US-05 (Neutre)"; houblon_amer = "Magnum"; houblon_arome = "Saaz"; ratio_base = 0.90; ratio_spe = 0.10
     if style == "IPA": malt_base_nom="Pale Ale"; malt_spe_nom="Carapils"; levure="Verdant IPA"; ratio_base=0.93; ratio_spe=0.07 
     elif style == "Stout": malt_base_nom="Maris Otter"; malt_spe_nom="Chocolat"; levure="S-04"; ratio_base=0.85; ratio_spe=0.15 
     elif style == "Ambrée": malt_base_nom="Pale Ale"; malt_spe_nom="Cara Ruby"; levure="T-58"; ratio_base=0.85; ratio_spe=0.15
     elif style == "Blanche": malt_base_nom="Pilsner"; malt_spe_nom="Blé (Froment)"; levure="WB-06"; ratio_base=0.60; ratio_spe=0.40 
     elif style == "Saison": malt_base_nom="Pilsner"; malt_spe_nom="Munich"; levure="Belle Saison"
     elif style == "Lager": malt_base_nom="Pilsner"; malt_spe_nom="Vienna"; levure="W-34/70"
-
-    aromes_clean = [a.split(" ")[1] if " " in a else a for a in aromes_selectionnes]
+    
+    aromes_clean = selected_aromas_list # Utilisation de la nouvelle liste
+    
     if "Biscuit" in aromes_clean: malt_spe_nom = "Biscuit"
     if "Fumé" in aromes_clean: malt_base_nom = "Fumé"
     if "Caramel" in aromes_clean and style != "Ambrée": malt_spe_nom = "Crystal 150"
@@ -325,31 +329,41 @@ if st.session_state.recette_generee:
     grammes_arome = calc_hops_weight(ibu_target * 0.2, aa_arome, 5, volume, boil_gravity)
     eau_empatage = total_grain_affiche * 3.0; eau_rincage = (volume * 1.15 + total_grain_affiche) - eau_empatage
     if eau_rincage < 0: eau_rincage = 0
-
-    st.markdown(f"<h2 style='text-align: center;'>FICHE DE PRODUCTION : {style.upper()}</h2>", unsafe_allow_html=True)
-    if aromes_clean: st.caption(f"<p style='text-align: center;'>Notes : {', '.join(aromes_clean)}</p>", unsafe_allow_html=True)
-    st.write("")
-
-    col_res1, col_res2 = st.columns([2, 1.5], gap="large")
     
-    with col_res1:
-        with st.container(border=True):
+    recette_data = {
+        "style": style, "aromes": aromes_clean, "volume": volume, "abv": degre_vise,
+        "og": target_og, "ibu": ibu_target, "ebc": ebc_estime, "eff": efficacite,
+        "grains": [{"nom": malt_base_nom, "poids": poids_base, "ratio": ratio_base}, {"nom": malt_spe_nom, "poids": poids_spe, "ratio": ratio_spe}],
+        "houblons": [{"nom": houblon_amer, "poids": int(grammes_amer), "usage": "Ebu 60min", "aa": aa_amer}, {"nom": houblon_arome, "poids": int(grammes_arome), "usage": "Arome 5min", "aa": aa_arome}],
+        "eau_emp": eau_empatage, "eau_rinc": eau_rincage, "levure": levure
+    }
+    
+    # AFFICHAGE DANS UN MODULE DISTINCT
+    with st.container(border=True): # Cadre visuel 2
+        
+        st.markdown(f"<h2 style='text-align: center; border-bottom: none;'>FICHE DE PRODUCTION : {style.upper()}</h2>", unsafe_allow_html=True)
+        if aromes_clean: st.caption(f"<p style='text-align: center; font-style:italic;'>Notes : {', '.join(aromes_clean)}</p>", unsafe_allow_html=True)
+        st.write("")
+
+        col_res1, col_res2 = st.columns([2, 1.5], gap="medium")
+        
+        with col_res1:
             st.markdown('<p class="subheader-text">🌾 GRAINS & FERMENTESCIBLES</p>', unsafe_allow_html=True)
-            st.markdown(f"**Total : {total_grain_affiche:.2f} kg** <span style='color:gray; font-size:0.8em'>(Eff. {int(efficacite*100)}% | EBC {int(ebc_estime)})</span>", unsafe_allow_html=True)
+            st.markdown(f"**Total : {total_grain_affiche:.2f} kg** <span style='color:#555; font-size:0.9em'>(Eff. {int(efficacite*100)}% | EBC {int(ebc_estime)})</span>", unsafe_allow_html=True)
             st.write(f"• **{poids_base:.2f} kg** : {malt_base_nom}")
             st.write(f"• **{poids_spe:.2f} kg** : {malt_spe_nom}")
+            
             st.write("")
             st.markdown('<p class="subheader-text">🦠 LEVURE</p>', unsafe_allow_html=True)
             st.write(f"• Souche : **{levure}** (1 sachet)")
 
-        with st.container(border=True):
+            st.write("")
             st.markdown('<p class="subheader-text">🌿 HOUBLONS</p>', unsafe_allow_html=True)
             st.write(f"• **{int(grammes_amer)}g** {houblon_amer} (Amérisant - 60min)")
             st.write(f"• **{int(grammes_arome)}g** {houblon_arome} (Aromatique - 5min)")
             st.caption(f"IBU Cible : {int(ibu_target)}")
-    
-    with col_res2:
-        with st.container(border=True):
+        
+        with col_res2:
             st.markdown('<p class="subheader-text">⏳ PROCESSUS</p>', unsafe_allow_html=True)
             c1, c2 = st.columns(2)
             c1.metric("1. Empâtage", "60 min", "67°C")
@@ -363,15 +377,7 @@ if st.session_state.recette_generee:
             st.divider()
             st.metric("4. Fermentation (20°C)", "~15 jours")
 
-    st.write("")
-    
-    recette_data = {
-        "style": style, "aromes": aromes_clean, "volume": volume, "abv": degre_vise,
-        "og": target_og, "ibu": ibu_target, "ebc": ebc_estime, "eff": efficacite,
-        "grains": [{"nom": malt_base_nom, "poids": poids_base, "ratio": ratio_base}, {"nom": malt_spe_nom, "poids": poids_spe, "ratio": ratio_spe}],
-        "houblons": [{"nom": houblon_amer, "poids": int(grammes_amer), "usage": "Ebu 60min", "aa": aa_amer}, {"nom": houblon_arome, "poids": int(grammes_arome), "usage": "Arome 5min", "aa": aa_arome}],
-        "eau_emp": eau_empatage, "eau_rinc": eau_rincage, "levure": levure
-    }
-    
-    pdf_bytes = create_pdf_compact(recette_data)
-    st.download_button(label="📥 Télécharger la Fiche de Production (PDF)", data=pdf_bytes, file_name=f"BeerFactory_{style}.pdf", mime='application/pdf', use_container_width=True)
+        st.write("")
+        st.divider()
+        pdf_bytes = create_pdf_compact(recette_data)
+        st.download_button(label="📥 TÉLÉCHARGER LA FICHE (PDF)", data=pdf_bytes, file_name=f"BeerFactory_{style}.pdf", mime='application/pdf', use_container_width=True)
