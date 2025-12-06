@@ -339,21 +339,18 @@ with st.container(border=True):
                     # Vérification état
                     is_selected = emoji in st.session_state.selected_aromas
                     
-                    # Le toggle combine le Label et le Switch côte à côte
-                    toggle_val = st.toggle(f"{name} {emoji}", value=is_selected, key=f"t_{emoji}")
+                    # Logique de blocage : si on est à 2, on bloque tous ceux qui NE SONT PAS sélectionnés
+                    is_disabled = (len(st.session_state.selected_aromas) >= 2 and not is_selected)
                     
-                    # Logique de changement d'état
+                    # Toggle avec paramètre disabled
+                    toggle_val = st.toggle(f"{name} {emoji}", value=is_selected, key=f"t_{emoji}", disabled=is_disabled)
+                    
+                    # Changement d'état
                     if toggle_val != is_selected:
                         if toggle_val:
-                            # Tentative d'activation
-                            if len(st.session_state.selected_aromas) < 2:
-                                st.session_state.selected_aromas.append(emoji)
-                                st.rerun()
-                            else:
-                                st.toast("⚠️ Maximum 2 arômes ! Désactivez-en un d'abord.", icon="🚫")
-                                st.rerun()
+                            st.session_state.selected_aromas.append(emoji)
+                            st.rerun()
                         else:
-                            # Désactivation
                             st.session_state.selected_aromas.remove(emoji)
                             st.rerun()
 
@@ -361,7 +358,6 @@ with st.container(border=True):
 # TRANSITION
 # ==========================================
 
-# Suppression des st.write("") pour réduire l'espace
 try:
     st.image("frise.png", use_container_width=True)
 except:
