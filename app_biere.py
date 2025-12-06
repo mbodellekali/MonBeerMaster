@@ -222,4 +222,67 @@ if st.session_state.recette_generee:
     
     # LOGIQUE STYLE
     if style == "IPA": base_malt="Pale Ale"; spe_malt="Carapils"; ratio_base=0.94; ratio_spe=0.06; yeast="Verdant IPA"; hop_aroma="Citra"
-    elif style == "Stout": base_malt="Maris Otter"; spe_malt="Chocolat"; ratio_base=0.85; ratio_spe
+    elif style == "Stout": base_malt="Maris Otter"; spe_malt="Chocolat"; ratio_base=0.85; ratio_spe=0.15; yeast="S-04"; hop_aroma="Fuggles"
+    elif style == "Ambrée": base_malt="Pale Ale"; spe_malt="Crystal 150"; ratio_base=0.85; ratio_spe=0.15; yeast="T-58"
+    
+    aromes_clean = [a.split(" ")[1] if " " in a else a for a in aromes_selectionnes]
+    if "Café" in aromes_clean: spe_malt = "Orge Grillé"
+
+    # 2. CALCULS SCIENTIFIQUES
+    target_og = calc_og_from_abv(degre_vise)
+    avg_yield = (MALTS_DB[base_malt]['yield'] * ratio_base) + (MALTS_DB[spe_malt]['yield'] * ratio_spe)
+    total_mass = calc_grain_weight(target_og, volume, 0.75, avg_yield)
+    
+    m_base = round_grain(total_mass * ratio_base)
+    m_spe = round_grain(total_mass * ratio_spe)
+    real_mass = m_base + m_spe
+    
+    ebc = estimate_color([(m_base, MALTS_DB[base_malt]), (m_spe, MALTS_DB[spe_malt])], volume)
+    
+    boil_gravity = target_og * 0.85
+    w_amer = calc_hops_weight(ibu_target*0.8, HOPS_DB[hop_amer]['aa'], 60, volume, boil_gravity)
+    w_aroma = calc_hops_weight(ibu_target*0.2, HOPS_DB[hop_aroma]['aa'], 5, volume, boil_gravity)
+    
+    eau_emp = real_mass * 3.0
+    eau_rinc = (volume * 1.15 + real_mass) - eau_emp
+    if eau_rinc < 0: eau_rinc = 0
+
+    # 3. PREP DATA POUR PDF
+    recette_data = {
+        "style": style, "aromes": aromes_clean, "volume": volume, "abv": degre_vise,
+        "og": target_og, "ibu": ibu_target, "ebc": ebc,
+        "grains": [
+            {"nom": base_malt, "poids": m_base, "ratio": ratio_base},
+            {"nom": spe_malt, "poids": m_spe, "ratio": ratio_spe}
+        ],
+        "houblons": [
+            {"nom": hop_amer, "poids": int(w_amer), "usage": "Ebu 60min", "aa": HOPS_DB[hop_amer]['aa']},
+            {"nom": hop_aroma, "poids": int(w_aroma), "usage": "Arome 5min", "aa": HOPS_DB[hop_aroma]['aa']}
+        ],
+        "eau_emp": eau_emp, "eau_rinc": eau_rinc, "levure": yeast
+    }
+
+    # 4. AFFICHAGE
+    st.divider()
+    c_res1, c_res2 = st.columns([2, 1])
+    
+    with c_res1:
+        st.success(f"Recette calculée : {real_mass:.2f} kg de grains pour {target_og:.3f} de densité.")
+        st.dataframe(pd.DataFrame([
+            {"Type": "Base", "Nom": base_malt, "Poids": f"{m_base} kg"},
+            {"Type": "Spécial", "Nom": spe_malt, "Poids": f"{m_spe} kg"},
+            {"Type": "Houblon", "Nom": hop_amer, "Poids": f"{int(w_amer)} g"},
+            {"Type": "Houblon", "Nom": hop_aroma, "Poids": f"{int(w_aroma)} g"}
+        ]), use_container_width=True)
+    
+    with c_res2:
+        st.write("### 📥 Export")
+        pdf_data = create_pdf_compact(recette_data)
+        st.download_button("Télécharger la fiche (1 Page)", data=pdf_data, file_name=f"BeerFactory_{style}.pdf", mime='application/pdf', use_container_width=True)
+        
+        # Matching
+        st.write("---")
+        match = df[df['Type'].str.contains(style, case=False, na=False)]
+        if not match.empty:
+            st.caption("Dans le commerce :")
+            st.write(f"🏆 {match.iloc[0]['Nom']}")
