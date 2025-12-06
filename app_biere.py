@@ -108,7 +108,7 @@ st.markdown("""
         font-size: 1.3rem; padding: 0.8rem 1.5rem;
     }
     
-    /* Bouton Secondaire (Arômes) */
+    /* Bouton Secondaire (Arômes non sélectionnés) */
     div.stButton > button[kind="secondary"] {
         background-color: #ffffff; color: var(--dark-brown) !important;
         font-size: 1.5rem; /* Gros Emoji */
@@ -132,6 +132,12 @@ st.markdown("""
     .stSelectbox label, .stNumberInput label, .stSlider label {
         color: var(--dark-brown) !important; font-weight: bold;
         font-family: 'Roboto', sans-serif; text-transform: uppercase;
+    }
+    
+    /* --- FORCE LA FLÈCHE DU SELECTBOX EN MARRON --- */
+    div[data-baseweb="select"] svg {
+        fill: var(--dark-brown) !important;
+        stroke: var(--dark-brown) !important;
     }
 
     div[data-baseweb="slider"] div[role="slider"] { background-color: var(--primary-amber) !important; }
@@ -253,14 +259,16 @@ with st.container(border=True):
             "Saison": "🚜 Rustique, sèche et poivrée.",
             "Lager": "❄️ Fermentation basse, nette."
         }
-        style = st.selectbox("Style", list(definitions_styles.keys()))
+        # AJOUT DE LA FLÈCHE DANS LE LABEL
+        style = st.selectbox("Style ▾", list(definitions_styles.keys()))
         st.caption(definitions_styles[style])
         
         c_v, c_a = st.columns(2)
         volume = c_v.slider("Volume (L)", 10, 100, 20, 10)
         degre_vise = c_a.slider("Alcool (%)", 3.0, 12.0, 6.0, 0.1)
         
-        # ESPACEMENT STANDARD AUTOMATIQUE ICI (Suppression des st.write)
+        st.write("")
+        st.write("")
         amertume = st.select_slider("Amertume Ciblée", options=["Légère", "Moyenne", "Forte", "Extrême"])
         ibu_map = {"Légère": 15, "Moyenne": 30, "Forte": 50, "Extrême": 80}
         ibu_target = ibu_map[amertume]
@@ -268,7 +276,6 @@ with st.container(border=True):
     with col2:
         st.markdown('<p class="subheader-text">2. CHOIX DES ARÔMES (MAX 2)</p>', unsafe_allow_html=True)
         
-        # LOGIQUE DE GRILLE POUR LES BOUTONS
         cols_per_row = 4
         rows = [AROMA_DATA[i:i + cols_per_row] for i in range(0, len(AROMA_DATA), cols_per_row)]
         
@@ -303,7 +310,7 @@ except:
 
 st.write("")
 
-c_b1, c_b2, c_b3 = st.columns([1, 2, 1]) # Colonnes ajustées pour centrer
+c_b1, c_b2, c_b3 = st.columns([1, 2, 1])
 with c_b2:
     if st.button("🍺 GÉNÉRER MA RECETTE 🍺", type="primary", use_container_width=True):
         st.session_state.recette_generee = True
@@ -325,7 +332,6 @@ if st.session_state.recette_generee:
     elif style == "Saison": malt_base_nom="Pilsner"; malt_spe_nom="Munich"; levure="Belle Saison"
     elif style == "Lager": malt_base_nom="Pilsner"; malt_spe_nom="Vienna"; levure="W-34/70"
     
-    # Traduction Emoji -> Nom pour la logique
     aromes_clean = [AROMA_DICT[e] for e in st.session_state.selected_aromas]
     
     if "Biscuit" in aromes_clean: malt_spe_nom = "Biscuit"
