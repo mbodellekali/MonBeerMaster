@@ -20,18 +20,24 @@ AROMA_DATA = [
 ]
 AROMA_DICT = {emoji: name for emoji, name in AROMA_DATA}
 
-# --- MOTEUR DE CALCULS ---
+# --- MOTEUR DE CALCULS & DESCRIPTIONS ---
 MALTS_DB = {
-    "Pilsner": {"yield": 78, "ebc": 3.5}, "Pale Ale": {"yield": 79, "ebc": 6.5},
-    "Maris Otter": {"yield": 78, "ebc": 5.0}, "Munich": {"yield": 76, "ebc": 15},
-    "Vienna": {"yield": 76, "ebc": 8}, "Blé (Froment)": {"yield": 80, "ebc": 4},
-    "Carapils": {"yield": 72, "ebc": 3}, "Malt Acide": {"yield": 50, "ebc": 4},
-    "Cara Ruby": {"yield": 74, "ebc": 50}, "Crystal 150": {"yield": 70, "ebc": 150},
-    "Chocolat": {"yield": 65, "ebc": 900}, "Orge Grillé": {"yield": 65, "ebc": 1200},
-    "Fumé": {"yield": 77, "ebc": 6}, "Biscuit": {"yield": 75, "ebc": 50}
+    "Pilsner": {"yield": 78, "ebc": 3.5, "desc": "Base légère et croustillante, notes de pain frais."},
+    "Pale Ale": {"yield": 79, "ebc": 6.5, "desc": "Base standard, notes maltées et légèrement biscuitées."},
+    "Maris Otter": {"yield": 78, "ebc": 5.0, "desc": "Malt anglais premium, riche, notes de noisette."},
+    "Munich": {"yield": 76, "ebc": 15, "desc": "Apporte de la rondeur et une couleur dorée profonde."},
+    "Vienna": {"yield": 76, "ebc": 8, "desc": "Légèrement toasté, notes de toffee subtiles."},
+    "Blé (Froment)": {"yield": 80, "ebc": 4, "desc": "Améliore la tenue de mousse et l'onctuosité."},
+    "Carapils": {"yield": 72, "ebc": 3, "desc": "Ajoute du corps et de la mousse sans changer le goût."},
+    "Malt Acide": {"yield": 50, "ebc": 4, "desc": "Utilisé pour abaisser le pH du moût."},
+    "Cara Ruby": {"yield": 74, "ebc": 50, "desc": "Caramel riche, fruits secs et couleur ambrée."},
+    "Crystal 150": {"yield": 70, "ebc": 150, "desc": "Caramel intense, toffee brûlé et couleur rouge."},
+    "Chocolat": {"yield": 65, "ebc": 900, "desc": "Notes de cacao amer et café noir (sans l'astringence)."},
+    "Orge Grillé": {"yield": 65, "ebc": 1200, "desc": "Grains non maltés, goût de café intense et sec."},
+    "Fumé": {"yield": 77, "ebc": 6, "desc": "Séché au bois de hêtre, goût fumé caractéristique."},
+    "Biscuit": {"yield": 75, "ebc": 50, "desc": "Goût de pain grillé et de croûte de pain."}
 }
 
-# AJOUT DES DESCRIPTIONS DANS LA DB HOUBLONS
 HOPS_DB = {
     "Magnum": {"aa": 12.0, "desc": "Amérisant neutre et très propre."},
     "Saaz": {"aa": 3.5, "desc": "Noble, notes herbacées et épicées douces."},
@@ -179,8 +185,8 @@ st.markdown("""
         font-family: 'Roboto', sans-serif; color: #555; font-size: 0.9rem; margin-top: 5px; font-weight: 500;
     }
     
-    /* DESCRIPTION HOUBLONS */
-    .hop-desc {
+    /* DESCRIPTION INGRÉDIENTS (GRAINS & HOUBLONS) */
+    .ing-desc {
         color: #666;
         font-style: italic;
         font-size: 0.9rem;
@@ -393,8 +399,15 @@ if st.session_state.recette_generee:
         with col_res1:
             st.markdown('<p class="subheader-text">🌾 GRAINS & FERMENTESCIBLES</p>', unsafe_allow_html=True)
             st.markdown(f"**Total : {total_grain_affiche:.2f} kg** <span style='color:#555; font-size:0.9em'>(Eff. {int(efficacite*100)}% | EBC {int(ebc_estime)})</span>", unsafe_allow_html=True)
+            
+            # Affichage Grains avec Description
+            desc_base = MALTS_DB.get(malt_base_nom, {}).get("desc", "")
             st.write(f"• **{poids_base:.2f} kg** : {malt_base_nom}")
+            st.markdown(f"<p class='ing-desc'>↳ {desc_base}</p>", unsafe_allow_html=True)
+            
+            desc_spe = MALTS_DB.get(malt_spe_nom, {}).get("desc", "")
             st.write(f"• **{poids_spe:.2f} kg** : {malt_spe_nom}")
+            st.markdown(f"<p class='ing-desc'>↳ {desc_spe}</p>", unsafe_allow_html=True)
             
             st.write("")
             st.markdown('<p class="subheader-text">🦠 LEVURE</p>', unsafe_allow_html=True)
@@ -403,14 +416,14 @@ if st.session_state.recette_generee:
             st.write("")
             st.markdown('<p class="subheader-text">🌿 HOUBLONS</p>', unsafe_allow_html=True)
             
-            # --- AFFICHAGE HOUBLONS AVEC DESCRIPTIONS ---
+            # Affichage Houblons avec Description
             desc_amer = HOPS_DB.get(houblon_amer, {}).get("desc", "")
             st.write(f"• **{int(grammes_amer)}g** {houblon_amer} (Amérisant - 60min)")
-            st.markdown(f"<p class='hop-desc'>↳ {desc_amer}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='ing-desc'>↳ {desc_amer}</p>", unsafe_allow_html=True)
             
             desc_arome = HOPS_DB.get(houblon_arome, {}).get("desc", "")
             st.write(f"• **{int(grammes_arome)}g** {houblon_arome} (Aromatique - 5min)")
-            st.markdown(f"<p class='hop-desc'>↳ {desc_arome}</p>", unsafe_allow_html=True)
+            st.markdown(f"<p class='ing-desc'>↳ {desc_arome}</p>", unsafe_allow_html=True)
             
             st.caption(f"IBU Cible : {int(ibu_target)}")
         
